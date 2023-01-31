@@ -1,4 +1,3 @@
-import 'package:camera/camera.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tripo/repo/repository.dart';
@@ -50,7 +49,7 @@ class _BottomNavState extends State<BottomNav> {
         backgroundColor: Repository.navbarColor(context),
         showSelectedLabels: false,
         showUnselectedLabels: false,
-        selectedLabelStyle: TextStyle(fontSize: 20, color: Styles.primaryColor),
+        selectedLabelStyle: TextStyle(fontSize: 25, color: Styles.primaryColor),
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Repository.selectedItemColor(context),
         unselectedItemColor: Colors.grey.withOpacity(0.7),

@@ -1,10 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:dropdown_button2/custom_dropdown_button2.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:tripo/utils/functions.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tripo/repo/repository.dart';
 import 'package:tripo/utils/styles.dart';
@@ -16,7 +14,6 @@ import 'package:photo_view/photo_view.dart';
 import 'package:tripo/widgets/my_app_bar.dart';
 import 'package:dio/dio.dart';
 import 'package:tripo/json/category_list.dart';
-// import 'package:cloud_functions/cloud_functions.dart';
 
 class ImagePreview extends StatefulWidget {
   const ImagePreview({Key? key, required this.imagePath}) : super(key: key);
@@ -40,9 +37,7 @@ class _ImagePreviewState extends State<ImagePreview> {
 
   @override
   void initState() {
-    imagePath = widget.imagePath == '..'
-        ? '/var/mobile/Containers/Data/Application/10FF7CB0-6605-4940-817E-5B2A26BF91ED/Documents/vkYQMLtrsN.png'
-        : widget.imagePath;
+    imagePath = widget.imagePath;
     super.initState();
   }
 
@@ -75,7 +70,7 @@ class _ImagePreviewState extends State<ImagePreview> {
                               height: 260.0,
                               child: ClipRect(
                                 child: PhotoView.customChild(
-                                  wantKeepAlive: true,
+                                  // wantKeepAlive: true,
                                   backgroundDecoration: BoxDecoration(
                                       color: Repository.accentColor(context)),
                                   child: Container(
@@ -83,9 +78,6 @@ class _ImagePreviewState extends State<ImagePreview> {
                                           color:
                                               Repository.accentColor(context)),
                                       padding: const EdgeInsets.all(10.0),
-                                      // child: Image.asset(
-                                      //     Assets
-                                      //         .background, //for test purpose only
                                       child: Image.file(File(imagePath),
                                           fit: BoxFit.contain)),
                                 ),

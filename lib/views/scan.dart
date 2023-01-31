@@ -1,9 +1,8 @@
-import 'dart:async';
 import 'dart:io';
 
-import 'package:edge_detection/edge_detection.dart';
+import 'package:document_scanner_flutter/document_scanner_flutter.dart';
+import 'package:document_scanner_flutter/configs/configs.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class ScanReceipt extends StatefulWidget {
   const ScanReceipt({Key? key}) : super(key: key);
@@ -13,32 +12,20 @@ class ScanReceipt extends StatefulWidget {
 }
 
 class _ScanReceiptState extends State<ScanReceipt> {
-  String? _imagePath;
+  File? _scannedDocumentFile;
+  File? _scannedImage;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  Future<void> getImage() async {
-    // String? imagePath;
-    // // Platform messages may fail, so we use a try/catch PlatformException.
-    // // We also handle the message potentially returning null.
-    // try {
-    //   imagePath = (await EdgeDetection.detectEdge);
-    //   print('$imagePath');
-    // } on PlatformException catch (e) {
-    //   imagePath = e.toString();
-    // }
-
-    // // If the widget was removed from the tree while the asynchronous platform
-    // // message was in flight, we want to discard the reply rather than calling
-    // // setState to update our non-existent appearance.
-    // if (!mounted) return;
-
-    // setState(() {
-    //   _imagePath = imagePath;
-    // });
+  openImageScanner(BuildContext context) async {
+    var image = await DocumentScannerFlutter.launch(context,
+        source: ScannerFileSource.GALLERY,
+        labelsConfig: {
+          ScannerLabelsConfig.ANDROID_NEXT_BUTTON_LABEL: "Next Step",
+          ScannerLabelsConfig.ANDROID_OK_LABEL: "OK"
+        });
+    if (image != null) {
+      _scannedImage = image;
+      setState(() {});
+    }
   }
 
   @override
@@ -46,40 +33,30 @@ class _ScanReceiptState extends State<ScanReceipt> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('Document Scanner Demo'),
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Center(
-                child: ElevatedButton(
-                  onPressed: getImage,
-                  child: const Text('Scan'),
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text('Cropped image path:'),
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (_scannedImage != null) ...[
+              if (_scannedImage != null)
+                Image.file(_scannedImage!,
+                    width: 300, height: 300, fit: BoxFit.contain),
               Padding(
-                padding: const EdgeInsets.only(top: 0, left: 0, right: 0),
+                padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  _imagePath.toString(),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ),
-              Visibility(
-                visible: _imagePath != null,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Image.file(
-                    File(_imagePath ?? ''),
-                  ),
-                ),
+                    _scannedDocumentFile?.path ?? _scannedImage?.path ?? ''),
               ),
             ],
-          ),
+            Center(
+              child: Builder(builder: (context) {
+                return ElevatedButton(
+                    onPressed: () => openImageScanner(context),
+                    child: Text("Image Scan"));
+              }),
+            )
+          ],
         ),
       ),
     );

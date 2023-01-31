@@ -1,9 +1,8 @@
-import 'package:edge_detection/edge_detection.dart';
+import 'package:document_scanner_flutter/configs/configs.dart';
+import 'package:document_scanner_flutter/document_scanner_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as path;
 import 'package:tripo/json/transactions.dart';
 import 'package:tripo/repo/repository.dart';
 import 'package:tripo/utils/iconly/iconly_bold.dart';
@@ -23,8 +22,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  // String? _imagePath;
-
   late User _currentUser;
 
   @override
@@ -34,40 +31,19 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> getImage(String type) async {
-    // Generate filepath for saving
-    String imagePath = path.join((await getApplicationSupportDirectory()).path,
-        '${(DateTime.now().millisecondsSinceEpoch / 1000).round()}.jpeg');
-    try {
-      bool success = false;
-      if (type == 'camera') {
-        //Make sure to await the call to detectEdge.
-        success = await EdgeDetection.detectEdge(
-          imagePath,
-          canUseGallery: false,
-          androidScanTitle: 'Scanning', // use custom localizations for android
-          androidCropTitle: 'Crop',
-          androidCropBlackWhiteTitle: 'Black White',
-          androidCropReset: 'Reset',
-        );
-      } else {
-        //Make sure to await the call to detectEdgeFromGallery.
-        success = await EdgeDetection.detectEdgeFromGallery(imagePath,
-            androidCropTitle: 'Crop', // use custom localizations for android
-            androidCropBlackWhiteTitle: 'Black White',
-            androidCropReset: 'Reset');
-      }
-      if (success) {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => ImagePreview(
-                      imagePath: imagePath,
-                    )));
-      }
-    } catch (e) {
-      print(e);
+    ScannerFileSource source = ScannerFileSource.CAMERA;
+    if (type != 'camera') {
+      source = ScannerFileSource.GALLERY;
     }
-    if (!mounted) return;
+    var image = await DocumentScannerFlutter.launch(context, source: source);
+    if (image != null) {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ImagePreview(
+                    imagePath: image.path,
+                  )));
+    }
   }
 
   @override
@@ -88,7 +64,7 @@ class _HomeState extends State<Home> {
             physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 15),
             children: [
-              Gap(getProportionateScreenHeight(50)),
+              Gap(getProportionateScreenHeight(70)),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -208,10 +184,10 @@ class _HomeState extends State<Home> {
                     InkWell(
                       onTap: () {
                         getImage('camera');
-                        //   Navigator.push(
-                        //       context,
-                        //       MaterialPageRoute(
-                        //           builder: (context) => const ScanReceipt()));
+                        // Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //         builder: (context) => const ScanReceipt()));
                       },
                       child: Container(
                         padding: const EdgeInsets.all(16),
