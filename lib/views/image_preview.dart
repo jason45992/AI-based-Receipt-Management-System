@@ -26,7 +26,8 @@ class ImagePreview extends StatefulWidget {
 class _ImagePreviewState extends State<ImagePreview> {
   var imagePath;
   final TextEditingController _vendor = TextEditingController();
-  final TextEditingController _receiptInfo = TextEditingController();
+  final TextEditingController _receiptDate = TextEditingController();
+  final TextEditingController _receiptAmount = TextEditingController();
 
   String? selectedValue = 'Others';
   late Image resultImg;
@@ -91,7 +92,7 @@ class _ImagePreviewState extends State<ImagePreview> {
                                     title: 'Vendor Name',
                                     label: receiptVendorName),
                                 DefaultTextField(
-                                    controller: _receiptInfo,
+                                    controller: _receiptDate,
                                     title: 'Date Time',
                                     label: receiptDateTime),
                                 Row(
@@ -189,7 +190,7 @@ class _ImagePreviewState extends State<ImagePreview> {
                                     const Gap(20),
                                     Flexible(
                                       child: DefaultTextField(
-                                          controller: _receiptInfo,
+                                          controller: _receiptAmount,
                                           title: 'Total Price',
                                           label: receiptTotalPrice),
                                     ),
@@ -250,6 +251,10 @@ class _ImagePreviewState extends State<ImagePreview> {
 
         imagePath = filePath;
         receiptDateTime = receiptDate + ' ' + receiptTime;
+
+        _vendor.text = receiptVendorName;
+        _receiptDate.text = receiptDateTime;
+        _receiptAmount.text = receiptTotalPrice;
 
         if (receiptVendorName.isNotEmpty) {
           // get category

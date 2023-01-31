@@ -1,9 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tripo/repo/repository.dart';
 import 'package:tripo/utils/input_decoration.dart';
 import 'package:tripo/utils/size_config.dart';
-import 'package:tripo/utils/styles.dart';
 import 'package:gap/gap.dart';
 
 class DefaultTextField extends StatelessWidget {
