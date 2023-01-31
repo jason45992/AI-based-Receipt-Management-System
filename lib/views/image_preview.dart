@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:dropdown_button2/custom_dropdown_button2.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:tripo/utils/functions.dart';
 import 'package:flutter/material.dart';
 import 'package:tripo/repo/repository.dart';
@@ -25,20 +26,21 @@ class ImagePreview extends StatefulWidget {
 
 class _ImagePreviewState extends State<ImagePreview> {
   var imagePath;
+  String orignalImgPath = '';
   final TextEditingController _vendor = TextEditingController();
   final TextEditingController _receiptDate = TextEditingController();
   final TextEditingController _receiptAmount = TextEditingController();
 
-  String? selectedValue = 'Others';
   late Image resultImg;
   String receiptVendorName = '';
   String receiptDateTime = '';
-  String receiptCategory = '';
+  String receiptCategory = 'Others';
   String receiptTotalPrice = '';
 
   @override
   void initState() {
     imagePath = widget.imagePath;
+    orignalImgPath = widget.imagePath;
     super.initState();
   }
 
@@ -50,7 +52,6 @@ class _ImagePreviewState extends State<ImagePreview> {
 
   @override
   Widget build(BuildContext context) {
-    resultImg = Image.file(File(imagePath));
     return GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
@@ -113,7 +114,7 @@ class _ImagePreviewState extends State<ImagePreview> {
                                           const Gap(5),
                                           CustomDropdownButton2(
                                               hint: '',
-                                              value: selectedValue,
+                                              value: receiptCategory,
                                               icon: Icon(
                                                 Icons.arrow_drop_down,
                                                 color: Repository.fieldColor(
@@ -144,7 +145,7 @@ class _ImagePreviewState extends State<ImagePreview> {
                                                           AlignmentDirectional
                                                               .centerStart,
                                                       child: Text(
-                                                        selectedValue!,
+                                                        receiptCategory,
                                                         style: TextStyle(
                                                           fontSize: 15,
                                                           color: Repository
@@ -161,29 +162,8 @@ class _ImagePreviewState extends State<ImagePreview> {
                                               },
                                               dropdownItems: categoryItems,
                                               onChanged: (value) {
-                                                // showDialog<String>(
-                                                //   context: context,
-                                                //   builder: (BuildContext context) => AlertDialog(
-                                                //     title: const Text('AlertDialog Title'),
-                                                //     content: Text(value.toString()),
-                                                //     actions: <Widget>[
-                                                //       TextButton(
-                                                //         onPressed: () =>
-                                                //             Navigator.pop(context, 'Cancel'),
-                                                //         child: const Text('Cancel'),
-                                                //       ),
-                                                //       TextButton(
-                                                //         onPressed: () =>
-                                                //             Navigator.pop(context, 'OK'),
-                                                //         child: const Text('OK'),
-                                                //       ),
-                                                //     ],
-                                                //   ),
-                                                // );
-                                                // setState(() {
-                                                selectedValue =
+                                                receiptCategory =
                                                     value.toString();
-                                                // });
                                               }),
                                           const Gap(10),
                                         ]),
@@ -202,7 +182,13 @@ class _ImagePreviewState extends State<ImagePreview> {
                                         Repository.selectedItemColor(context),
                                     context: context,
                                     text: 'Add Receipt',
-                                    callback: () async {}),
+                                    callback: () async {
+                                      print(_vendor.text);
+                                      print(_receiptDate.text);
+                                      print(receiptCategory);
+                                      print(_receiptAmount.text);
+                                      uploadImage();
+                                    }),
                               ]),
                             )
                           ],
@@ -278,7 +264,7 @@ class _ImagePreviewState extends State<ImagePreview> {
             for (var element in categoryList) {
               for (var item in element) {
                 if (returnedCate.contains(item)) {
-                  selectedValue = element.first.capitalize();
+                  receiptCategory = element.first.capitalize();
                   break;
                 }
               }
@@ -288,6 +274,26 @@ class _ImagePreviewState extends State<ImagePreview> {
       } catch (ex) {
         print(ex);
       }
+    }
+  }
+
+  uploadImage() async {
+    final _firebaseStorage = FirebaseStorage.instance;
+    //Select Image
+    var file = File(orignalImgPath);
+
+    if (orignalImgPath != '') {
+      //Upload to Firebase
+      var snapshot = await _firebaseStorage
+          .ref()
+          .child('images/' + orignalImgPath.split('/').last)
+          .putFile(file);
+      var downloadUrl = await snapshot.ref.getDownloadURL();
+      // setState(() {
+      print('imageUrl: ' + downloadUrl);
+      // });
+    } else {
+      print('No Image Path Received');
     }
   }
 }
