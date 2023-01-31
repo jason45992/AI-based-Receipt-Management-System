@@ -34,13 +34,13 @@ class _ProfileState extends State<Profile> {
       backgroundColor: Repository.bgColor(context),
       appBar: myAppBar(title: 'Profile', implyLeading: false, context: context),
       body: ListView(
-        padding: const EdgeInsets.all(15),
+        padding: const EdgeInsets.all(20),
         children: [
-          const Gap(40),
+          // const Gap(40),
           Stack(
             children: [
               Container(
-                height: 280,
+                height: 270,
                 alignment: Alignment.bottomCenter,
                 child: Container(
                   height: 230,
