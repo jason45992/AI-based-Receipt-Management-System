@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_button2/custom_dropdown_button2.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -15,6 +16,7 @@ import 'package:photo_view/photo_view.dart';
 import 'package:tripo/widgets/my_app_bar.dart';
 import 'package:dio/dio.dart';
 import 'package:tripo/json/category_list.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ImagePreview extends StatefulWidget {
   const ImagePreview({Key? key, required this.imagePath}) : super(key: key);
@@ -26,6 +28,7 @@ class ImagePreview extends StatefulWidget {
 
 class _ImagePreviewState extends State<ImagePreview> {
   var imagePath;
+  User? currentUser;
   String orignalImgPath = '';
   final TextEditingController _vendor = TextEditingController();
   final TextEditingController _receiptDate = TextEditingController();
@@ -41,6 +44,7 @@ class _ImagePreviewState extends State<ImagePreview> {
   void initState() {
     imagePath = widget.imagePath;
     orignalImgPath = widget.imagePath;
+    currentUser = FirebaseAuth.instance.currentUser;
     super.initState();
   }
 
@@ -279,6 +283,7 @@ class _ImagePreviewState extends State<ImagePreview> {
 
   uploadImage() async {
     final _firebaseStorage = FirebaseStorage.instance;
+    final db = FirebaseFirestore.instance;
     //Select Image
     var file = File(orignalImgPath);
 
@@ -289,9 +294,20 @@ class _ImagePreviewState extends State<ImagePreview> {
           .child('images/' + orignalImgPath.split('/').last)
           .putFile(file);
       var downloadUrl = await snapshot.ref.getDownloadURL();
-      // setState(() {
       print('imageUrl: ' + downloadUrl);
-      // });
+
+      //Create record in FireStore
+      final receiptInfo = <String, dynamic>{
+        'vendor_name': _vendor.text,
+        'date_time': _receiptDate.text,
+        'category': receiptCategory,
+        'total_amount': _receiptAmount.text,
+        'image_url': downloadUrl,
+        'user_email': currentUser?.email
+      };
+
+      db.collection('receipts').add(receiptInfo).then((DocumentReference doc) =>
+          print('DocumentSnapshot added with ID: ${doc.id}'));
     } else {
       print('No Image Path Received');
     }
