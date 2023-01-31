@@ -2,8 +2,8 @@ import 'package:edge_detection/edge_detection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import 'package:tripo/json/transactions.dart';
 import 'package:tripo/repo/repository.dart';
 import 'package:tripo/utils/iconly/iconly_bold.dart';
@@ -33,32 +33,41 @@ class _HomeState extends State<Home> {
     super.initState();
   }
 
-  Future<void> getImage() async {
-    // String? imagePath;
-    // // Platform messages may fail, so we use a try/catch PlatformException.
-    // // We also handle the message potentially returning null.
-    // try {
-    //   imagePath = (await EdgeDetection.detectEdge);
-    // } on PlatformException catch (e) {
-    //   imagePath = e.toString();
-    // }
-
-    // if (imagePath != null) {
-    //   Navigator.push(
-    //       context,
-    //       MaterialPageRoute(
-    //           builder: (context) => ImagePreview(
-    //                 imagePath: imagePath!,
-    //               )));
-    // }
-    // // If the widget was removed from the tree while the asynchronous platform
-    // // message was in flight, we want to discard the reply rather than calling
-    // // setState to update our non-existent appearance.
-    // if (!mounted) return;
-
-    // setState(() {
-    //   // homepagedecl._imagePath.value = imagePath;
-    // });
+  Future<void> getImage(String type) async {
+    // Generate filepath for saving
+    String imagePath = path.join((await getApplicationSupportDirectory()).path,
+        '${(DateTime.now().millisecondsSinceEpoch / 1000).round()}.jpeg');
+    try {
+      bool success = false;
+      if (type == 'camera') {
+        //Make sure to await the call to detectEdge.
+        success = await EdgeDetection.detectEdge(
+          imagePath,
+          canUseGallery: false,
+          androidScanTitle: 'Scanning', // use custom localizations for android
+          androidCropTitle: 'Crop',
+          androidCropBlackWhiteTitle: 'Black White',
+          androidCropReset: 'Reset',
+        );
+      } else {
+        //Make sure to await the call to detectEdgeFromGallery.
+        success = await EdgeDetection.detectEdgeFromGallery(imagePath,
+            androidCropTitle: 'Crop', // use custom localizations for android
+            androidCropBlackWhiteTitle: 'Black White',
+            androidCropReset: 'Reset');
+      }
+      if (success) {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ImagePreview(
+                      imagePath: imagePath,
+                    )));
+      }
+    } catch (e) {
+      print(e);
+    }
+    if (!mounted) return;
   }
 
   @override
@@ -197,12 +206,12 @@ class _HomeState extends State<Home> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     InkWell(
-                      // onTap: getImage,
-                      onTap: () async {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const ScanReceipt()));
+                      onTap: () {
+                        getImage('camera');
+                        //   Navigator.push(
+                        //       context,
+                        //       MaterialPageRoute(
+                        //           builder: (context) => const ScanReceipt()));
                       },
                       child: Container(
                         padding: const EdgeInsets.all(16),
@@ -227,19 +236,8 @@ class _HomeState extends State<Home> {
                       ),
                     ),
                     InkWell(
-                      onTap: () async {
-                        final ImagePicker _picker = ImagePicker();
-                        // Pick an image
-                        final XFile? image = await _picker.pickImage(
-                            source: ImageSource.gallery);
-                        if (image?.path != null) {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ImagePreview(
-                                        imagePath: image!.path,
-                                      )));
-                        }
+                      onTap: () {
+                        getImage('gallery');
                       },
                       child: Container(
                         padding: const EdgeInsets.all(16),
