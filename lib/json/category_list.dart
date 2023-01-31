@@ -1,6 +1,6 @@
 //items not in list counted as 'others'
 List<List<String>> categoryList = [
-  ['food', 'bakery', 'bar', 'cafe', 'restaurant'],
+  ['food', 'meal', 'bakery', 'bar', 'cafe', 'restaurant'],
   ['beauty', 'beauty_salon', 'hair_care'],
   ['supermarket'],
   ['shopping', 'store', 'florist'],
