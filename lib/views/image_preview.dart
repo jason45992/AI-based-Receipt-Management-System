@@ -8,6 +8,7 @@ import 'package:tripo/utils/functions.dart';
 import 'package:flutter/material.dart';
 import 'package:tripo/repo/repository.dart';
 import 'package:tripo/utils/styles.dart';
+import 'package:tripo/utils/validation.dart';
 import 'package:tripo/widgets/buttons.dart';
 import 'package:tripo/widgets/default_text_field.dart';
 import 'package:gap/gap.dart';
@@ -17,6 +18,7 @@ import 'package:tripo/widgets/my_app_bar.dart';
 import 'package:dio/dio.dart';
 import 'package:tripo/json/category_list.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 
 class ImagePreview extends StatefulWidget {
   const ImagePreview({Key? key, required this.imagePath}) : super(key: key);
@@ -240,7 +242,7 @@ class _ImagePreviewState extends State<ImagePreview> {
         }
 
         imagePath = filePath;
-        receiptDateTime = receiptDate + ' ' + receiptTime;
+        receiptDateTime = formatDatetime(receiptDate, receiptTime);
 
         _vendor.text = receiptVendorName;
         _receiptDate.text = receiptDateTime;
@@ -311,5 +313,85 @@ class _ImagePreviewState extends State<ImagePreview> {
     } else {
       print('No Image Path Received');
     }
+  }
+
+  String formatDatetime(String date, String time) {
+    //prase date
+    if (date.isNotEmpty && !isValidDate(date, 'dd/MM/yyyy')) {
+      String dateFormat = '';
+      if (isValidDate(date, 'dd-MM-yyyy')) {
+        dateFormat = 'dd-MM-yyyy';
+      } else if (isValidDate(date, 'dd MM yyyy')) {
+        dateFormat = 'dd MM yyyy';
+      } else if (isValidDate(date, 'MM/dd/yyyy')) {
+        dateFormat = 'MM/dd/yyyy';
+      } else if (isValidDate(date, 'MM-dd-yyyy')) {
+        dateFormat = 'MM-dd-yyyy';
+      } else if (isValidDate(date, 'MM dd yyyy')) {
+        dateFormat = 'MM dd yyyy';
+      } else if (isValidDate(date, 'yyyy/MM/dd')) {
+        dateFormat = 'yyyy/MM/dd';
+      } else if (isValidDate(date, 'yyyy-MM-dd')) {
+        dateFormat = 'yyyy-MM-dd';
+      } else if (isValidDate(date, 'yyyy MM dd')) {
+        dateFormat = 'yyyy MM dd';
+      } else if (isValidDate(date, 'dd/MM/yy')) {
+        dateFormat = 'dd/MM/yy';
+      } else if (isValidDate(date, 'dd-MM-yy')) {
+        dateFormat = 'dd-MM-yy';
+      } else if (isValidDate(date, 'dd MM yy')) {
+        dateFormat = 'dd MM yy';
+      } else if (isValidDate(date, 'MM/dd/yy')) {
+        dateFormat = 'MM/dd/yy';
+      } else if (isValidDate(date, 'MM-dd-yy')) {
+        dateFormat = 'MM-dd-yy';
+      } else if (isValidDate(date, 'MM dd yy')) {
+        dateFormat = 'MM dd yy';
+      } else if (isValidDate(date, 'yy/MM/dd')) {
+        dateFormat = 'yy/MM/dd';
+      } else if (isValidDate(date, 'yy-MM-dd')) {
+        dateFormat = 'yy-MM-dd';
+      } else if (isValidDate(date, 'yy MM dd')) {
+        dateFormat = 'yy MM dd';
+      } else if (isValidDate(date, 'yy MMM dd')) {
+        dateFormat = 'yy MMM dd';
+      } else if (isValidDate(date, 'MMM dd yy')) {
+        dateFormat = 'MMM dd yy';
+      } else if (isValidDate(date, 'yy MMMM dd')) {
+        dateFormat = 'yy MMMM dd';
+      } else if (isValidDate(date, 'MMMM dd yy')) {
+        dateFormat = 'MMMM dd yy';
+      } else if (isValidDate(date, 'yyyy MMM dd')) {
+        dateFormat = 'yyyy MMM dd';
+      } else if (isValidDate(date, 'MMM dd yyyy')) {
+        dateFormat = 'MMM dd yyyy';
+      } else if (isValidDate(date, 'yyyy MMMM dd')) {
+        dateFormat = 'yyyy MMMM dd';
+      } else if (isValidDate(date, 'MMMM dd yyyy')) {
+        dateFormat = 'MMMM dd yyyy';
+      }
+      if (dateFormat.isNotEmpty) {
+        date = DateFormat('dd/MM/yyyy')
+            .format(DateFormat(dateFormat).parseStrict(date));
+      }
+    }
+
+    if (time.isNotEmpty && !isValidDate(time, 'Hm')) {
+      String timeFormat = '';
+      if (isValidDate(time, 'Hms')) {
+        timeFormat = 'Hms';
+      } else if (isValidDate(time, 'jm')) {
+        timeFormat = 'jm';
+      } else if (isValidDate(time, 'jms')) {
+        timeFormat = 'jms';
+      }
+      if (timeFormat.isNotEmpty) {
+        time = DateFormat.Hm().format(DateFormat(timeFormat).parseStrict(time));
+      }
+    }
+
+    print(date + ' ' + time);
+
+    return date + ' ' + time;
   }
 }

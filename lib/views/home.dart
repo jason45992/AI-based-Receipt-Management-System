@@ -1,17 +1,17 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:document_scanner_flutter/configs/configs.dart';
 import 'package:document_scanner_flutter/document_scanner_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:tripo/json/transactions.dart';
+import 'package:iconly/iconly.dart';
+import 'package:tripo/json/category_list.dart';
 import 'package:tripo/repo/repository.dart';
-import 'package:tripo/utils/iconly/iconly_bold.dart';
 import 'package:tripo/utils/layouts.dart';
 import 'package:tripo/utils/size_config.dart';
 import 'package:tripo/utils/styles.dart';
 import 'package:tripo/views/image_preview.dart';
 import 'package:gap/gap.dart';
-import 'package:tripo/views/scan.dart';
 
 class Home extends StatefulWidget {
   final User user;
@@ -23,10 +23,12 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   late User _currentUser;
+  List<Map<String, dynamic>> transactions = [];
 
   @override
   void initState() {
     _currentUser = widget.user;
+    getTransactions();
     super.initState();
   }
 
@@ -91,7 +93,7 @@ class _HomeState extends State<Home> {
                         color: Colors.white,
                       ),
                       child: Icon(
-                        IconlyBold.Notification,
+                        IconlyBold.notification,
                         color: Styles.accentColor,
                       ),
                     ),
@@ -116,22 +118,11 @@ class _HomeState extends State<Home> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: const [
-                            // Image.asset(Assets.cardsVisaYellow,
-                            //     width: 60, height: 50, fit: BoxFit.cover),
                             Text('Banner',
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 32,
                                     color: Colors.white)),
-                            // const Gap(20),
-                            // Text('CARD NUMBER',
-                            //     style: TextStyle(
-                            //         color: Colors.white.withOpacity(0.5),
-                            //         fontSize: 12)),
-                            // const Gap(5),
-                            // const Text('3829 4820 4629 5025',
-                            //     style: TextStyle(
-                            //         color: Colors.white, fontSize: 15)),
                           ],
                         ),
                       ),
@@ -143,28 +134,6 @@ class _HomeState extends State<Home> {
                               right: Radius.circular(15)),
                           color: Styles.yellowColor,
                         ),
-                        // child: Column(
-                        //   crossAxisAlignment: CrossAxisAlignment.start,
-                        //   children: [
-                        //     Container(
-                        //       padding: const EdgeInsets.all(10),
-                        //       margin: const EdgeInsets.only(top: 10),
-                        //       decoration: BoxDecoration(
-                        //         shape: BoxShape.circle,
-                        //         color: Styles.greenColor,
-                        //       ),
-                        //       child: const Icon(
-                        //         Icons.swipe_rounded,
-                        //         color: Colors.white,
-                        //         size: 20,
-                        //       ),
-                        //     ),
-                        //     const Spacer(),
-                        //     const Text('VALID', style: TextStyle(fontSize: 12)),
-                        //     const Gap(5),
-                        //     const Text('05/22', style: TextStyle(fontSize: 15)),
-                        //   ],
-                        // ),
                       )
                     ],
                   ),
@@ -184,10 +153,6 @@ class _HomeState extends State<Home> {
                     InkWell(
                       onTap: () {
                         getImage('camera');
-                        // Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //         builder: (context) => const ScanReceipt()));
                       },
                       child: Container(
                         padding: const EdgeInsets.all(16),
@@ -200,7 +165,7 @@ class _HomeState extends State<Home> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            Icon(IconlyBold.Scan,
+                            Icon(IconlyBold.scan,
                                 color: Repository.textColor(context)),
                             Text('Scan',
                                 style: TextStyle(
@@ -226,7 +191,7 @@ class _HomeState extends State<Home> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            Icon(IconlyBold.Image,
+                            Icon(IconlyBold.image,
                                 color: Repository.textColor(context)),
                             Text('Add',
                                 style: TextStyle(
@@ -293,15 +258,15 @@ class _HomeState extends State<Home> {
                             shape: BoxShape.circle,
                           ),
                           child: Icon(trs['icon'],
-                              color: const Color(0xFFFF736C), size: 20)),
-                      title: Text(trs['name'],
+                              color: trs['iconColor'], size: 20)),
+                      title: Text(trs['vendor_name'],
                           style: TextStyle(
                               color: Repository.textColor(context),
                               fontWeight: FontWeight.w500)),
-                      subtitle: Text(trs['date'],
+                      subtitle: Text(trs['date_time'],
                           style: TextStyle(
                               color: Repository.subTextColor(context))),
-                      trailing: Text(trs['amount'],
+                      trailing: Text(trs['total_amount'],
                           style: TextStyle(
                               fontSize: 17,
                               color: Repository.subTextColor(context))),
@@ -314,5 +279,25 @@ class _HomeState extends State<Home> {
         ],
       ),
     );
+  }
+
+  Future<void> getTransactions() async {
+    final db = FirebaseFirestore.instance;
+    await db
+        .collection('receipts')
+        .where('user_email', isEqualTo: _currentUser.email)
+        .orderBy('date_time', descending: true)
+        .get()
+        .then(
+          (res) => res.docs.forEach((element) {
+            Map<String, dynamic> item = element.data();
+            item['icon'] = getIcon(element.data()['category']);
+            item['iconColor'] = getIconColor(element.data()['category']);
+            transactions.add(item);
+          }),
+          onError: (e) => print('Error completing: $e'),
+        );
+
+    setState(() {});
   }
 }
