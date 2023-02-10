@@ -5,7 +5,7 @@ import 'package:tripo/generated/assets.dart';
 import 'package:tripo/json/shortcut_list.dart';
 import 'package:tripo/repo/repository.dart';
 import 'package:tripo/widgets/custom_list_tile.dart';
-import 'package:tripo/utils/iconly/iconly_bold.dart';
+import 'package:iconly/iconly.dart';
 import 'package:tripo/utils/styles.dart';
 import 'package:tripo/widgets/my_app_bar.dart';
 import 'package:gap/gap.dart';
@@ -116,22 +116,22 @@ class _ProfileState extends State<Profile> {
           ),
           const Gap(35),
           CustomListTile(
-              icon: IconlyBold.Profile,
+              icon: IconlyBold.profile,
               color: const Color(0xFFFF736C),
               title: 'Information',
               context: context),
           CustomListTile(
-              icon: IconlyBold.Shield_Done,
+              icon: IconlyBold.shield_done,
               color: const Color(0xFF229e76),
               title: 'Security',
               context: context),
           CustomListTile(
-              icon: IconlyBold.Message,
+              icon: IconlyBold.message,
               color: const Color(0xFFe17a0a),
               title: 'Contact us',
               context: context),
           CustomListTile(
-              icon: IconlyBold.Document,
+              icon: IconlyBold.document,
               color: const Color(0xFF064c6d),
               title: 'Support',
               context: context),

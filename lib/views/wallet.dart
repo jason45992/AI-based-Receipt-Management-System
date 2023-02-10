@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tripo/generated/assets.dart';
 import 'package:tripo/repo/repository.dart';
-import 'package:tripo/utils/iconly/iconly_bold.dart';
+import 'package:iconly/iconly.dart';
 import 'package:tripo/utils/layouts.dart';
 import 'package:tripo/utils/styles.dart';
 import 'package:tripo/views/add_card.dart';
@@ -51,7 +51,7 @@ class Wallet extends StatelessWidget {
               CircleAvatar(
                 backgroundColor: Repository.accentColor(context),
                 child:
-                    Icon(IconlyBold.Scan, color: Repository.textColor(context)),
+                    Icon(IconlyBold.scan, color: Repository.textColor(context)),
                 radius: 23,
               )
             ],

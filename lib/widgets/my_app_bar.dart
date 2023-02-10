@@ -1,7 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tripo/repo/repository.dart';
-import 'package:tripo/utils/iconly/iconly_light.dart';
+import 'package:iconly/iconly.dart';
 import 'package:gap/gap.dart';
 
 AppBar myAppBar(
@@ -28,6 +27,6 @@ AppBar myAppBar(
             ))
         : const SizedBox(),
     actions:
-        hasAction == true ? const [Icon(IconlyBroken.Search), Gap(15)] : null,
+        hasAction == true ? const [Icon(IconlyBroken.search), Gap(15)] : null,
   );
 }

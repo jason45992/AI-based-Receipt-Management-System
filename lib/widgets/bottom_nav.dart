@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tripo/repo/repository.dart';
-import 'package:tripo/utils/iconly/iconly_bold.dart';
+import 'package:iconly/iconly.dart';
 import 'package:tripo/utils/styles.dart';
 import 'package:tripo/views/home.dart';
 import 'package:tripo/views/profile.dart';
@@ -55,19 +55,19 @@ class _BottomNavState extends State<BottomNav> {
         unselectedItemColor: Colors.grey.withOpacity(0.7),
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(IconlyBold.Home),
+            icon: Icon(IconlyBold.home),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(IconlyBold.Wallet),
+            icon: Icon(IconlyBold.wallet),
             label: 'Wallet',
           ),
           BottomNavigationBarItem(
-            icon: Icon(IconlyBold.Chart),
+            icon: Icon(IconlyBold.chart),
             label: 'Stats',
           ),
           BottomNavigationBarItem(
-            icon: Icon(IconlyBold.Profile),
+            icon: Icon(IconlyBold.profile),
             label: 'Profile',
           ),
         ],
