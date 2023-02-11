@@ -7,3 +7,7 @@ extension StringExtension on String {
     return '${this[0].toUpperCase()}${substring(1)}';
   }
 }
+
+extension DoubleExtension on double {
+  double toPrecision(int n) => double.parse(toStringAsFixed(n));
+}

@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:document_scanner_flutter/configs/configs.dart';
 import 'package:document_scanner_flutter/document_scanner_flutter.dart';
@@ -12,9 +14,11 @@ import 'package:tripo/repo/repository.dart';
 import 'package:tripo/utils/layouts.dart';
 import 'package:tripo/utils/size_config.dart';
 import 'package:tripo/utils/styles.dart';
+import 'package:tripo/utils/functions.dart';
 import 'package:tripo/views/image_preview.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
+import 'package:collection/collection.dart';
 
 class Home extends StatefulWidget {
   final User user;
@@ -106,103 +110,61 @@ class _HomeState extends State<Home> {
                   ],
                 ),
                 const Gap(15),
-                Container(
-                  height: 200,
-                  decoration: BoxDecoration(
-                    color: Repository.cardColor(context).withOpacity(0.4),
-
-                    borderRadius: const BorderRadius.all(
-                      Radius.circular(20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: size.height * 0.23,
+                      width: size.width * 0.55,
+                      // padding: const EdgeInsets.fromLTRB(16, 10, 0, 20),
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.horizontal(
+                            left: Radius.circular(15)),
+                        color: Colors.black.withOpacity(0.3),
+                      ),
+                      child: AspectRatio(
+                        aspectRatio: 1,
+                        child: PieChart(
+                          PieChartData(
+                            pieTouchData: PieTouchData(
+                              touchCallback:
+                                  (FlTouchEvent event, pieTouchResponse) {
+                                setState(() {
+                                  if (!event.isInterestedForInteractions ||
+                                      pieTouchResponse == null ||
+                                      pieTouchResponse.touchedSection == null) {
+                                    touchedIndex = -1;
+                                    return;
+                                  }
+                                  touchedIndex = pieTouchResponse
+                                      .touchedSection!.touchedSectionIndex;
+                                });
+                              },
+                            ),
+                            borderData: FlBorderData(
+                              show: false,
+                            ),
+                            sectionsSpace: 0,
+                            centerSpaceRadius: 33,
+                            sections: showingSections(),
+                          ),
+                        ),
+                      ),
                     ),
-                    // border:
-                    //     Border.all(color: Repository.accentColor(context))
-                  ),
-                  child: Column(
-                    children: [
-                      Container(
-                          height: size.height * 0.21,
-                          padding: const EdgeInsets.fromLTRB(22, 22, 22, 0),
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                AspectRatio(
-                                  aspectRatio: 1.2,
-                                  child: PieChart(
-                                    PieChartData(
-                                      pieTouchData: PieTouchData(
-                                        touchCallback: (FlTouchEvent event,
-                                            pieTouchResponse) {
-                                          setState(() {
-                                            if (!event
-                                                    .isInterestedForInteractions ||
-                                                pieTouchResponse == null ||
-                                                pieTouchResponse
-                                                        .touchedSection ==
-                                                    null) {
-                                              touchedIndex = -1;
-                                              return;
-                                            }
-                                            touchedIndex = pieTouchResponse
-                                                .touchedSection!
-                                                .touchedSectionIndex;
-                                          });
-                                        },
-                                      ),
-                                      borderData: FlBorderData(
-                                        show: false,
-                                      ),
-                                      sectionsSpace: 0,
-                                      centerSpaceRadius: 35,
-                                      sections: showingSections(),
-                                    ),
-                                  ),
-                                ),
-                                const Gap(25),
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Indicator(
-                                      color: Colors.blue,
-                                      text: 'First',
-                                      textColor: Styles.whiteColor,
-                                      isSquare: true,
-                                    ),
-                                    const SizedBox(
-                                      height: 4,
-                                    ),
-                                    Indicator(
-                                      color: Colors.yellow,
-                                      text: 'Second',
-                                      textColor: Styles.whiteColor,
-                                      isSquare: true,
-                                    ),
-                                    const SizedBox(
-                                      height: 4,
-                                    ),
-                                    Indicator(
-                                      color: Colors.purple,
-                                      text: 'Third',
-                                      textColor: Styles.whiteColor,
-                                      isSquare: true,
-                                    ),
-                                    const SizedBox(
-                                      height: 4,
-                                    ),
-                                    Indicator(
-                                      color: Colors.green,
-                                      text: 'Fourth',
-                                      textColor: Styles.whiteColor,
-                                      isSquare: true,
-                                    ),
-                                    const SizedBox(
-                                      height: 18,
-                                    ),
-                                  ],
-                                ),
-                              ])),
-                    ],
-                  ),
+                    Container(
+                        height: size.height * 0.23,
+                        width: size.width * 0.35,
+                        padding: const EdgeInsets.fromLTRB(10, 10, 0, 20),
+                        decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.horizontal(
+                                right: Radius.circular(15)),
+                            color: Styles.yellowColor),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: getIndicator(),
+                        )),
+                  ],
                 ),
                 const Gap(15),
                 Container(
@@ -374,7 +336,6 @@ class _HomeState extends State<Home> {
     DateTime currentDateTime = DateTime.now();
     DateTime tdyDate = DateTime(
         currentDateTime.year, currentDateTime.month, currentDateTime.day);
-    print("tdy: " + tdyDate.toString());
     switch (currentFilterOption) {
       case 'Latest':
         await db
@@ -420,12 +381,10 @@ class _HomeState extends State<Home> {
       case 'Week':
         Timestamp monDate = Timestamp.fromDate(DateTime(
             tdyDate.year, tdyDate.month, tdyDate.day - (tdyDate.weekday - 1)));
-        print(monDate.toDate().toString());
 
         Timestamp sunDate = Timestamp.fromDate(DateTime(tdyDate.year,
                 tdyDate.month, tdyDate.day - (tdyDate.weekday - 1))
             .add(const Duration(days: 6)));
-        print(sunDate.toDate().toString());
         await db
             .collection('receipts')
             .where('user_email', isEqualTo: _currentUser.email)
@@ -448,10 +407,8 @@ class _HomeState extends State<Home> {
       case 'Month':
         Timestamp startDate =
             Timestamp.fromDate(DateTime(tdyDate.year, tdyDate.month, 1));
-        print(startDate.toDate().toString());
         Timestamp endDate =
             Timestamp.fromDate(DateTime(tdyDate.year, tdyDate.month + 1, 1));
-        print(endDate.toDate().toString());
         await db
             .collection('receipts')
             .where('user_email', isEqualTo: _currentUser.email)
@@ -476,67 +433,50 @@ class _HomeState extends State<Home> {
   }
 
   List<PieChartSectionData> showingSections() {
-    return List.generate(4, (i) {
-      final isTouched = i == touchedIndex;
-      final fontSize = isTouched ? 25.0 : 16.0;
-      final radius = isTouched ? 60.0 : 50.0;
-      const shadows = [Shadow(color: Colors.black, blurRadius: 2)];
-      switch (i) {
-        case 0:
-          return PieChartSectionData(
-            color: Colors.blue,
-            value: 40,
-            title: '40%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Repository.textColor(context),
-              shadows: shadows,
-            ),
-          );
-        case 1:
-          return PieChartSectionData(
-            color: Colors.yellow,
-            value: 30,
-            title: '30%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Repository.textColor(context),
-              shadows: shadows,
-            ),
-          );
-        case 2:
-          return PieChartSectionData(
-            color: Colors.purple,
-            value: 15,
-            title: '15%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Repository.textColor(context),
-              shadows: shadows,
-            ),
-          );
-        case 3:
-          return PieChartSectionData(
-            color: Colors.green,
-            value: 15,
-            title: '15%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Repository.textColor(context),
-              shadows: shadows,
-            ),
-          );
-        default:
-          throw Error();
-      }
+    List<PieChartSectionData> result = [];
+    var categoryMap = groupBy(transactions, (Map obj) => obj['category']);
+    List<dynamic> keys = categoryMap.keys.toList();
+    if (categoryMap.isNotEmpty) {
+      categoryMap.forEach((i, value) {
+        int index = keys.indexOf(i);
+        double percent = ((value.length / transactions.length)).toPrecision(2);
+        final isTouched = index == touchedIndex;
+        final fontSize = isTouched ? 22.0 : 16.0;
+        final radius = isTouched ? 60.0 : 50.0;
+        const shadows = [Shadow(color: Colors.black, blurRadius: 2)];
+        result.add(PieChartSectionData(
+          color: getIconColor(i.toString()),
+          value: percent,
+          title: (((percent * 100).toPrecision(2)).toString()) + '%',
+          radius: radius,
+          titleStyle: TextStyle(
+            fontSize: fontSize,
+            fontWeight: FontWeight.bold,
+            color: Styles.primaryColor,
+            shadows: shadows,
+          ),
+        ));
+      });
+    }
+    return result;
+  }
+
+  List<Widget> getIndicator() {
+    List<Widget> result = [];
+
+    var categoryMap = groupBy(transactions, (Map obj) => obj['category']);
+    List<dynamic> keys = categoryMap.keys.toList();
+    keys.forEachIndexed((index, element) {
+      result.add(Indicator(
+        color: getIconColor(keys[index]),
+        text: keys[index],
+        isSquare: true,
+        size: 10,
+      ));
+      result.add(const SizedBox(
+        height: 4,
+      ));
     });
+    return result;
   }
 }
