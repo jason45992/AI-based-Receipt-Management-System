@@ -1,5 +1,7 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:tripo/generated/assets.dart';
 import 'package:tripo/repo/repository.dart';
 import 'package:tripo/utils/layouts.dart';
@@ -11,185 +13,106 @@ import 'package:tripo/widgets/my_app_bar.dart';
 import 'package:gap/gap.dart';
 
 class AddCard extends StatefulWidget {
-  const AddCard({Key? key}) : super(key: key);
+  final Map<String, dynamic> transaction;
+  const AddCard({required this.transaction});
 
   @override
   _AddCardState createState() => _AddCardState();
 }
 
 class _AddCardState extends State<AddCard> {
-  final TextEditingController _cardHolderName = TextEditingController();
-  final TextEditingController _cardNumber = TextEditingController();
-  List paymentCardsList = [
-    Assets.cardsVisa,
-    Assets.cardsMastercard,
-    Assets.cardsPaypal,
-    // Assets.cardsSkrill
-  ];
-  int selectedCard = 0;
+  String imagePath = '';
+
+  late Map<String, dynamic> _currentTransaction;
+  @override
+  void initState() {
+    _currentTransaction = widget.transaction;
+    imagePath = _currentTransaction['image_url'];
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = Layouts.getSize(context);
     final cardSize = size.height * 0.23;
     SizeConfig.init(context);
     return Scaffold(
-      backgroundColor: Repository.bgColor(context),
-      appBar: myAppBar(title: 'Add Card', implyLeading: true, context: context),
-      body: ListView(
-        padding: const EdgeInsets.all(15),
-        children: [
-          SizedBox(
-            width: double.infinity,
-            height: cardSize,
+        backgroundColor: Repository.bgColor(context),
+        appBar: myAppBar(
+            title: 'Receipt Detail', implyLeading: true, context: context),
+        body: Padding(
+            padding: const EdgeInsets.only(left: 15.0, right: 15.0),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  height: cardSize * 0.35,
-                  padding: const EdgeInsets.fromLTRB(16, 10, 20, 20),
-                  decoration: BoxDecoration(
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(15)),
-                    color: Styles.greenColor,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Image.asset(Assets.cardsVisaWhite,
-                          width: 60, height: 45, fit: BoxFit.cover),
-                      const Text('\$00.00',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 22,
-                              color: Colors.white)),
-                    ],
+                  margin: const EdgeInsets.symmetric(horizontal: 10.0),
+                  height: 260.0,
+                  child: ClipRect(
+                    child: PhotoView.customChild(
+                      // wantKeepAlive: true,
+                      backgroundDecoration:
+                          BoxDecoration(color: Repository.accentColor(context)),
+                      child: Container(
+                          decoration: BoxDecoration(
+                              color: Repository.accentColor(context)),
+                          padding: const EdgeInsets.all(10.0),
+                          child: Image.network(imagePath, fit: BoxFit.contain)),
+                    ),
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 0, 20),
-                  height: cardSize * 0.65,
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.vertical(
-                        bottom: Radius.circular(15)),
-                    color: Styles.yellowColor,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      customColumn(
-                          title: 'CARD NUMBER',
-                          subtitle: '**** **** **** ****'),
-                      const Spacer(),
-                      Row(
+                const Gap(20),
+                Expanded(
+                  child: ListView(children: [
+                    Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          customColumn(
-                              title: 'CARD HOLDER NAME', subtitle: 'N/A'),
-                          const Gap(40),
-                          customColumn(title: 'VALID', subtitle: 'N/A')
-                        ],
-                      )
-                    ],
-                  ),
+                          Text(
+                            'Vendor Name: ' +
+                                _currentTransaction['vendor_name'],
+                            style: TextStyle(
+                                color: Repository.textColor(context),
+                                fontWeight: FontWeight.w500,
+                                fontSize: 15),
+                            // textAlign: TextAlign.left,
+                          ),
+                          const Gap(5),
+                          Text(
+                            'Category: ' + _currentTransaction['category'],
+                            style: TextStyle(
+                                color: Repository.textColor(context),
+                                fontWeight: FontWeight.w500,
+                                fontSize: 15),
+                            // textAlign: TextAlign.left,
+                          ),
+                          const Gap(5),
+                          Text(
+                            'Amount: ' + _currentTransaction['total_amount'],
+                            style: TextStyle(
+                                color: Repository.textColor(context),
+                                fontWeight: FontWeight.w500,
+                                fontSize: 15),
+                            // textAlign: TextAlign.left,
+                          ),
+                          const Gap(5),
+                          Text(
+                            'Date Time: ' + _currentTransaction['date_time'],
+                            style: TextStyle(
+                                color: Repository.textColor(context),
+                                fontWeight: FontWeight.w500,
+                                fontSize: 15),
+                            // textAlign: TextAlign.left,
+                          ),
+                          const Gap(5),
+                        ]),
+                    const Gap(20),
+                    elevatedButton(
+                        color: Repository.selectedItemColor(context),
+                        context: context,
+                        text: 'Delete Receipt',
+                        callback: () async {}),
+                  ]),
                 )
               ],
-            ),
-          ),
-          const Gap(20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: paymentCardsList.map<Widget>((paymentCard) {
-              return MaterialButton(
-                elevation: 0,
-                color: Repository.accentColor(context),
-                minWidth: 70,
-                height: 100,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(13),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        image: DecorationImage(
-                          image: AssetImage(paymentCard),
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ),
-                    const Gap(15),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 700),
-                      child: Icon(
-                        selectedCard == paymentCardsList.indexOf(paymentCard)
-                            ? Icons.check_circle
-                            : Icons.circle_outlined,
-                        color: selectedCard ==
-                                paymentCardsList.indexOf(paymentCard)
-                            ? Repository.selectedItemColor(context)
-                            : Colors.white.withOpacity(0.5),
-                      ),
-                    )
-                  ],
-                ),
-                onPressed: () {
-                  setState(() {
-                    selectedCard = paymentCardsList.indexOf(paymentCard);
-                  });
-                },
-              );
-            }).toList(),
-          ),
-          const Gap(30),
-          DefaultTextField(
-              controller: _cardHolderName, title: 'Card Holder Name'),
-          DefaultTextField(
-              controller: _cardNumber,
-              title: 'Card Number',
-              label: '5632-1587-536-256'),
-          Row(
-            children: [
-              Flexible(
-                child: DefaultTextField(
-                    controller: _cardNumber,
-                    title: 'Expiry date',
-                    label: '05/2022'),
-              ),
-              const Gap(10),
-              Flexible(
-                child: DefaultTextField(
-                    controller: _cardNumber,
-                    title: 'CVC/CVV',
-                    label: '******',
-                    obscure: true),
-              ),
-            ],
-          ),
-          const Gap(10),
-          elevatedButton(
-            color: Repository.selectedItemColor(context),
-            context: context,
-            callback: () {},
-            text: 'Add Card',
-          )
-        ],
-      ),
-    );
-  }
-
-  Widget customColumn({required String title, required String subtitle}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title.toUpperCase(), style: const TextStyle(fontSize: 12)),
-        const Gap(4),
-        Text(subtitle, style: const TextStyle(fontSize: 16)),
-      ],
-    );
+            )));
   }
 }

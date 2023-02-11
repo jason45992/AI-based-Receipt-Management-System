@@ -35,7 +35,7 @@ class _BottomNavState extends State<BottomNav> {
     if (user != null) {
       _widgetOptions = <Widget>[
         Home(user: user!),
-        const Wallet(),
+        Wallet(user: user!),
         const Stats(),
         Profile(user: user!),
       ];

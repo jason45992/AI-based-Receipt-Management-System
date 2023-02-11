@@ -1,16 +1,34 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:tripo/generated/assets.dart';
+import 'package:tripo/json/category_list.dart';
 import 'package:tripo/repo/repository.dart';
 import 'package:iconly/iconly.dart';
 import 'package:tripo/utils/layouts.dart';
-import 'package:tripo/utils/styles.dart';
+import 'package:intl/intl.dart';
 import 'package:tripo/views/add_card.dart';
 import 'package:tripo/widgets/my_app_bar.dart';
 import 'package:gap/gap.dart';
 
-class Wallet extends StatelessWidget {
-  const Wallet({Key? key}) : super(key: key);
+class Wallet extends StatefulWidget {
+  final User user;
+  const Wallet({required this.user});
+
+  @override
+  _WalletState createState() => _WalletState();
+}
+
+class _WalletState extends State<Wallet> {
+  late User _currentUser;
+  List<Map<String, dynamic>> transactions = [];
+
+  @override
+  void initState() {
+    _currentUser = widget.user;
+    getTransactions();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +36,7 @@ class Wallet extends StatelessWidget {
     return Scaffold(
       backgroundColor: Repository.bgColor(context),
       appBar:
-          myAppBar(title: 'All Cards', implyLeading: false, context: context),
+          myAppBar(title: 'Receipts', implyLeading: false, context: context),
       body: ListView(
         padding: const EdgeInsets.all(15),
         children: [
@@ -26,8 +44,8 @@ class Wallet extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               InkWell(
-                onTap: () => Navigator.push(context,
-                    MaterialPageRoute(builder: (c) => const AddCard())),
+                // onTap: () => Navigator.push(context,
+                //     MaterialPageRoute(builder: (c) => const AddCard())),
                 child: Container(
                   width: size.width * 0.78,
                   padding: const EdgeInsets.symmetric(vertical: 12),
@@ -41,7 +59,7 @@ class Wallet extends StatelessWidget {
                       Icon(CupertinoIcons.add,
                           color: Repository.textColor(context), size: 20),
                       const Gap(10),
-                      Text('ADD NEW CARD',
+                      Text('Search Receipt',
                           style:
                               TextStyle(color: Repository.textColor(context)))
                     ],
@@ -50,224 +68,87 @@ class Wallet extends StatelessWidget {
               ),
               CircleAvatar(
                 backgroundColor: Repository.accentColor(context),
-                child:
-                    Icon(IconlyBold.scan, color: Repository.textColor(context)),
+                child: Icon(IconlyBroken.search,
+                    color: Repository.textColor(context)),
                 radius: 23,
               )
             ],
           ),
           const Gap(22),
-          FittedBox(
-            child: SizedBox(
-              height: size.height * 0.23,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: size.width * 0.67,
-                    padding: const EdgeInsets.fromLTRB(16, 10, 0, 20),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const BouncingScrollPhysics(),
+            itemCount: transactions.length,
+            itemBuilder: (c, i) {
+              final trs = transactions[i];
+              return ListTile(
+                onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (c) => AddCard(
+                              transaction: trs,
+                            ))),
+                isThreeLine: true,
+                minLeadingWidth: 10,
+                minVerticalPadding: 20,
+                contentPadding: const EdgeInsets.all(0),
+                leading: Container(
+                    width: 40,
+                    height: 40,
+                    padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.horizontal(
-                          left: Radius.circular(15)),
-                      color: Styles.greenColor,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Image.asset(Assets.cardsVisaYellow,
-                            width: 60, height: 50, fit: BoxFit.cover),
-                        const Text('1500.00 SGD',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 32,
-                                color: Colors.white)),
-                        const Gap(20),
-                        Text('CARD NUMBER',
-                            style: TextStyle(
-                                color: Colors.white.withOpacity(0.5),
-                                fontSize: 12)),
-                        const Gap(5),
-                        const Text('3829 4820 4629 5025',
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 15)),
+                      color: Repository.accentColor(context),
+                      boxShadow: [
+                        BoxShadow(
+                          offset: const Offset(0, 1),
+                          color: Colors.white.withOpacity(0.1),
+                          blurRadius: 2,
+                          spreadRadius: 1,
+                        )
                       ],
+                      shape: BoxShape.circle,
                     ),
-                  ),
-                  Container(
-                    width: size.width * 0.27,
-                    padding: const EdgeInsets.fromLTRB(20, 10, 0, 20),
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.horizontal(
-                          right: Radius.circular(15)),
-                      color: Styles.yellowColor,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          margin: const EdgeInsets.only(top: 10),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Styles.greenColor,
-                          ),
-                          child: const Icon(Icons.swipe_rounded,
-                              color: Colors.white, size: 20),
-                        ),
-                        const Spacer(),
-                        const Text('VALID', style: TextStyle(fontSize: 12)),
-                        const Gap(5),
-                        const Text('05/22', style: TextStyle(fontSize: 15)),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ),
-          ),
-          const Gap(20),
-          FittedBox(
-            child: SizedBox(
-              height: size.height * 0.23,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: size.width * 0.67,
-                    padding: const EdgeInsets.fromLTRB(16, 10, 0, 20),
-                    decoration: const BoxDecoration(
-                      borderRadius:
-                          BorderRadius.horizontal(left: Radius.circular(15)),
-                      color: Color(0xFF7be8b8),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Image.asset(Assets.cardsMastercard,
-                            width: 60, height: 50, fit: BoxFit.cover),
-                        Text('20.00 SGD',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 32,
-                                color: Styles.primaryColor)),
-                        const Gap(20),
-                        Text('CARD NUMBER',
-                            style: TextStyle(
-                                color: Styles.primaryColor.withOpacity(0.7),
-                                fontSize: 12)),
-                        const Gap(5),
-                        Text('3829 4820 4629 5025',
-                            style: TextStyle(
-                                color: Styles.primaryColor, fontSize: 15)),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    width: size.width * 0.27,
-                    padding: const EdgeInsets.fromLTRB(20, 10, 0, 20),
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.horizontal(
-                          right: Radius.circular(15)),
-                      color: Styles.greenColor,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          margin: const EdgeInsets.only(top: 10),
-                          decoration: const BoxDecoration(
-                              shape: BoxShape.circle, color: Colors.white),
-                          child: Icon(Icons.swipe_rounded,
-                              color: Styles.greenColor, size: 20),
-                        ),
-                        const Spacer(),
-                        Text('VALID',
-                            style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.white.withOpacity(0.5))),
-                        const Gap(5),
-                        const Text('06/22',
-                            style:
-                                TextStyle(fontSize: 15, color: Colors.white)),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ),
-          ),
-          const Gap(20),
-          FittedBox(
-            child: SizedBox(
-              height: size.height * 0.23,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: size.width * 0.67,
-                    padding: const EdgeInsets.fromLTRB(16, 10, 0, 20),
-                    decoration: const BoxDecoration(
-                      borderRadius:
-                          BorderRadius.horizontal(left: Radius.circular(15)),
-                      color: Color(0xFFFF9E44),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Image.asset(Assets.cardsPaypal,
-                            width: 80, height: 50, fit: BoxFit.cover),
-                        const Text('250.00 \$',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 32,
-                                color: Colors.white)),
-                        const Gap(20),
-                        Text('CARD NUMBER',
-                            style: TextStyle(
-                                color: Colors.white.withOpacity(0.5),
-                                fontSize: 12)),
-                        const Gap(5),
-                        const Text('3829 4820 4629 5025',
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 15)),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    width: size.width * 0.27,
-                    padding: const EdgeInsets.fromLTRB(20, 10, 0, 20),
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.horizontal(
-                          right: Radius.circular(15)),
-                      color: Styles.yellowColor,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          margin: const EdgeInsets.only(top: 10),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Styles.primaryColor,
-                          ),
-                          child: const Icon(Icons.swipe_rounded,
-                              color: Colors.white, size: 20),
-                        ),
-                        const Spacer(),
-                        const Text('VALID', style: TextStyle(fontSize: 12)),
-                        const Gap(5),
-                        const Text('05/22', style: TextStyle(fontSize: 15)),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ),
+                    child:
+                        Icon(trs['icon'], color: trs['iconColor'], size: 20)),
+                title: Text(trs['vendor_name'],
+                    style: TextStyle(
+                        color: Repository.textColor(context),
+                        fontWeight: FontWeight.w500)),
+                subtitle: Text(trs['date_time'],
+                    style: TextStyle(color: Repository.subTextColor(context))),
+                trailing: Text(trs['total_amount'],
+                    style: TextStyle(
+                        fontSize: 17, color: Repository.subTextColor(context))),
+              );
+            },
           )
         ],
       ),
     );
+  }
+
+  Future<void> getTransactions() async {
+    final db = FirebaseFirestore.instance;
+    transactions = [];
+    DateTime currentDateTime = DateTime.now();
+    DateTime tdyDate = DateTime(
+        currentDateTime.year, currentDateTime.month, currentDateTime.day);
+    await db
+        .collection('receipts')
+        .where('user_email', isEqualTo: _currentUser.email)
+        .orderBy('date_time', descending: true)
+        .get()
+        .then(
+          (res) => res.docs.forEach((element) {
+            Map<String, dynamic> item = element.data();
+            item['icon'] = getIcon(element.data()['category']);
+            item['iconColor'] = getIconColor(element.data()['category']);
+            item['date_time'] = DateFormat('dd/MM/yyyy HH:mm')
+                .format(element.data()['date_time'].toDate());
+            transactions.add(item);
+          }),
+          onError: (e) => print('Error completing: $e'),
+        );
+    setState(() {});
   }
 }
