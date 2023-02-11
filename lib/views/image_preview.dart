@@ -300,8 +300,9 @@ class _ImagePreviewState extends State<ImagePreview> {
 
       //Create record in FireStore
       final receiptInfo = <String, dynamic>{
-        'vendor_name': _vendor.text,
-        'date_time': _receiptDate.text,
+        'vendor_name': _vendor.text.capitalizeFistWord(),
+        'date_time': Timestamp.fromDate(
+            DateFormat('dd/MM/yyyy HH:mm').parseStrict(_receiptDate.text)),
         'category': receiptCategory,
         'total_amount': _receiptAmount.text,
         'image_url': downloadUrl,
@@ -376,7 +377,7 @@ class _ImagePreviewState extends State<ImagePreview> {
       }
     }
 
-    if (time.isNotEmpty && !isValidDate(time, 'Hm')) {
+    if (time.isNotEmpty && !isValidDate(time, 'HH:mm')) {
       String timeFormat = '';
       if (isValidDate(time, 'Hms')) {
         timeFormat = 'Hms';

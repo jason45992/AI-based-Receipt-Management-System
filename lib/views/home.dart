@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:document_scanner_flutter/configs/configs.dart';
 import 'package:document_scanner_flutter/document_scanner_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:tripo/utils/pie_chart_indicator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
@@ -12,6 +14,7 @@ import 'package:tripo/utils/size_config.dart';
 import 'package:tripo/utils/styles.dart';
 import 'package:tripo/views/image_preview.dart';
 import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
 
 class Home extends StatefulWidget {
   final User user;
@@ -24,6 +27,9 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   late User _currentUser;
   List<Map<String, dynamic>> transactions = [];
+  List<String> filterOptions = ['Latest', 'Today', 'Week', 'Month'];
+  String currentFilterOption = 'Latest';
+  int touchedIndex = -1;
 
   @override
   void initState() {
@@ -59,7 +65,7 @@ class _HomeState extends State<Home> {
         children: [
           Container(
             width: double.infinity,
-            height: size.height * 0.44,
+            height: size.height * 0.47,
             color: Repository.headerColor(context),
           ),
           Padding(
@@ -100,42 +106,102 @@ class _HomeState extends State<Home> {
                   ],
                 ),
                 const Gap(15),
-                FittedBox(
-                  child: SizedBox(
-                    height: size.height * 0.23,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: size.width * 0.67,
-                          padding: const EdgeInsets.fromLTRB(16, 10, 0, 20),
-                          decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.horizontal(
-                                left: Radius.circular(15)),
-                            color: Repository.cardColor(context),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Text('Banner',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 32,
-                                      color: Colors.white)),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          width: size.width * 0.27,
-                          padding: const EdgeInsets.fromLTRB(20, 10, 0, 20),
-                          decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.horizontal(
-                                right: Radius.circular(15)),
-                            color: Styles.yellowColor,
-                          ),
-                        )
-                      ],
+                Container(
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: Repository.cardColor(context).withOpacity(0.4),
+
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(20),
                     ),
+                    // border:
+                    //     Border.all(color: Repository.accentColor(context))
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                          height: size.height * 0.21,
+                          padding: const EdgeInsets.fromLTRB(22, 22, 22, 0),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                AspectRatio(
+                                  aspectRatio: 1.2,
+                                  child: PieChart(
+                                    PieChartData(
+                                      pieTouchData: PieTouchData(
+                                        touchCallback: (FlTouchEvent event,
+                                            pieTouchResponse) {
+                                          setState(() {
+                                            if (!event
+                                                    .isInterestedForInteractions ||
+                                                pieTouchResponse == null ||
+                                                pieTouchResponse
+                                                        .touchedSection ==
+                                                    null) {
+                                              touchedIndex = -1;
+                                              return;
+                                            }
+                                            touchedIndex = pieTouchResponse
+                                                .touchedSection!
+                                                .touchedSectionIndex;
+                                          });
+                                        },
+                                      ),
+                                      borderData: FlBorderData(
+                                        show: false,
+                                      ),
+                                      sectionsSpace: 0,
+                                      centerSpaceRadius: 35,
+                                      sections: showingSections(),
+                                    ),
+                                  ),
+                                ),
+                                const Gap(25),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Indicator(
+                                      color: Colors.blue,
+                                      text: 'First',
+                                      textColor: Styles.whiteColor,
+                                      isSquare: true,
+                                    ),
+                                    const SizedBox(
+                                      height: 4,
+                                    ),
+                                    Indicator(
+                                      color: Colors.yellow,
+                                      text: 'Second',
+                                      textColor: Styles.whiteColor,
+                                      isSquare: true,
+                                    ),
+                                    const SizedBox(
+                                      height: 4,
+                                    ),
+                                    Indicator(
+                                      color: Colors.purple,
+                                      text: 'Third',
+                                      textColor: Styles.whiteColor,
+                                      isSquare: true,
+                                    ),
+                                    const SizedBox(
+                                      height: 4,
+                                    ),
+                                    Indicator(
+                                      color: Colors.green,
+                                      text: 'Fourth',
+                                      textColor: Styles.whiteColor,
+                                      isSquare: true,
+                                    ),
+                                    const SizedBox(
+                                      height: 18,
+                                    ),
+                                  ],
+                                ),
+                              ])),
+                    ],
                   ),
                 ),
                 const Gap(15),
@@ -204,7 +270,7 @@ class _HomeState extends State<Home> {
                     ],
                   ),
                 ),
-                const Gap(25),
+                const Gap(15),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -213,16 +279,30 @@ class _HomeState extends State<Home> {
                             color: Repository.textColor(context),
                             fontSize: 18,
                             fontWeight: FontWeight.bold)),
-                    Row(
-                      children: [
-                        Text('Today',
-                            style: TextStyle(
-                                color: Repository.subTextColor(context),
-                                fontSize: 16)),
-                        const Gap(3),
-                        Icon(CupertinoIcons.chevron_down,
-                            color: Repository.subTextColor(context), size: 17)
-                      ],
+                    DropdownButton<String>(
+                      isDense: true,
+                      value: currentFilterOption,
+                      icon: Icon(CupertinoIcons.chevron_down,
+                          color: Repository.subTextColor(context), size: 17),
+                      // elevation: 16,
+                      style: TextStyle(
+                          color: Repository.subTextColor(context),
+                          fontSize: 16),
+                      underline: const SizedBox(),
+                      onChanged: (String? value) {
+                        // This is called when the user selects an item.
+                        // setState(() {
+                        currentFilterOption = value!;
+                        getTransactions();
+                        // });
+                      },
+                      items: filterOptions
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
                     )
                   ],
                 ),
@@ -290,21 +370,173 @@ class _HomeState extends State<Home> {
 
   Future<void> getTransactions() async {
     final db = FirebaseFirestore.instance;
-    await db
-        .collection('receipts')
-        .where('user_email', isEqualTo: _currentUser.email)
-        .orderBy('date_time', descending: true)
-        .get()
-        .then(
-          (res) => res.docs.forEach((element) {
-            Map<String, dynamic> item = element.data();
-            item['icon'] = getIcon(element.data()['category']);
-            item['iconColor'] = getIconColor(element.data()['category']);
-            transactions.add(item);
-          }),
-          onError: (e) => print('Error completing: $e'),
-        );
+    transactions = [];
+    DateTime currentDateTime = DateTime.now();
+    DateTime tdyDate = DateTime(
+        currentDateTime.year, currentDateTime.month, currentDateTime.day);
+    print("tdy: " + tdyDate.toString());
+    switch (currentFilterOption) {
+      case 'Latest':
+        await db
+            .collection('receipts')
+            .where('user_email', isEqualTo: _currentUser.email)
+            .orderBy('date_time', descending: true)
+            .get()
+            .then(
+              (res) => res.docs.forEach((element) {
+                Map<String, dynamic> item = element.data();
+                item['icon'] = getIcon(element.data()['category']);
+                item['iconColor'] = getIconColor(element.data()['category']);
+                item['date_time'] = DateFormat('dd/MM/yyyy HH:mm')
+                    .format(element.data()['date_time'].toDate());
+                transactions.add(item);
+              }),
+              onError: (e) => print('Error completing: $e'),
+            );
+        break;
+      case 'Today':
+        Timestamp tmrDate =
+            Timestamp.fromDate(tdyDate.add(const Duration(days: 1)));
+        await db
+            .collection('receipts')
+            .where('user_email', isEqualTo: _currentUser.email)
+            .where('date_time',
+                isLessThan: tmrDate,
+                isGreaterThanOrEqualTo: Timestamp.fromDate(tdyDate))
+            .orderBy('date_time', descending: true)
+            .get()
+            .then(
+              (res) => res.docs.forEach((element) {
+                Map<String, dynamic> item = element.data();
+                item['icon'] = getIcon(element.data()['category']);
+                item['iconColor'] = getIconColor(element.data()['category']);
+                item['date_time'] = DateFormat('dd/MM/yyyy HH:mm')
+                    .format(element.data()['date_time'].toDate());
+                transactions.add(item);
+              }),
+              onError: (e) => print('Error completing: $e'),
+            );
+        break;
+      case 'Week':
+        Timestamp monDate = Timestamp.fromDate(DateTime(
+            tdyDate.year, tdyDate.month, tdyDate.day - (tdyDate.weekday - 1)));
+        print(monDate.toDate().toString());
 
+        Timestamp sunDate = Timestamp.fromDate(DateTime(tdyDate.year,
+                tdyDate.month, tdyDate.day - (tdyDate.weekday - 1))
+            .add(const Duration(days: 6)));
+        print(sunDate.toDate().toString());
+        await db
+            .collection('receipts')
+            .where('user_email', isEqualTo: _currentUser.email)
+            .where('date_time',
+                isLessThanOrEqualTo: sunDate, isGreaterThanOrEqualTo: monDate)
+            .orderBy('date_time', descending: true)
+            .get()
+            .then(
+              (res) => res.docs.forEach((element) {
+                Map<String, dynamic> item = element.data();
+                item['icon'] = getIcon(element.data()['category']);
+                item['iconColor'] = getIconColor(element.data()['category']);
+                item['date_time'] = DateFormat('dd/MM/yyyy HH:mm')
+                    .format(element.data()['date_time'].toDate());
+                transactions.add(item);
+              }),
+              onError: (e) => print('Error completing: $e'),
+            );
+        break;
+      case 'Month':
+        Timestamp startDate =
+            Timestamp.fromDate(DateTime(tdyDate.year, tdyDate.month, 1));
+        print(startDate.toDate().toString());
+        Timestamp endDate =
+            Timestamp.fromDate(DateTime(tdyDate.year, tdyDate.month + 1, 1));
+        print(endDate.toDate().toString());
+        await db
+            .collection('receipts')
+            .where('user_email', isEqualTo: _currentUser.email)
+            .where('date_time',
+                isLessThan: endDate, isGreaterThanOrEqualTo: startDate)
+            .orderBy('date_time', descending: true)
+            .get()
+            .then(
+              (res) => res.docs.forEach((element) {
+                Map<String, dynamic> item = element.data();
+                item['icon'] = getIcon(element.data()['category']);
+                item['iconColor'] = getIconColor(element.data()['category']);
+                item['date_time'] = DateFormat('dd/MM/yyyy HH:mm')
+                    .format(element.data()['date_time'].toDate());
+                transactions.add(item);
+              }),
+              onError: (e) => print('Error completing: $e'),
+            );
+        break;
+    }
     setState(() {});
+  }
+
+  List<PieChartSectionData> showingSections() {
+    return List.generate(4, (i) {
+      final isTouched = i == touchedIndex;
+      final fontSize = isTouched ? 25.0 : 16.0;
+      final radius = isTouched ? 60.0 : 50.0;
+      const shadows = [Shadow(color: Colors.black, blurRadius: 2)];
+      switch (i) {
+        case 0:
+          return PieChartSectionData(
+            color: Colors.blue,
+            value: 40,
+            title: '40%',
+            radius: radius,
+            titleStyle: TextStyle(
+              fontSize: fontSize,
+              fontWeight: FontWeight.bold,
+              color: Repository.textColor(context),
+              shadows: shadows,
+            ),
+          );
+        case 1:
+          return PieChartSectionData(
+            color: Colors.yellow,
+            value: 30,
+            title: '30%',
+            radius: radius,
+            titleStyle: TextStyle(
+              fontSize: fontSize,
+              fontWeight: FontWeight.bold,
+              color: Repository.textColor(context),
+              shadows: shadows,
+            ),
+          );
+        case 2:
+          return PieChartSectionData(
+            color: Colors.purple,
+            value: 15,
+            title: '15%',
+            radius: radius,
+            titleStyle: TextStyle(
+              fontSize: fontSize,
+              fontWeight: FontWeight.bold,
+              color: Repository.textColor(context),
+              shadows: shadows,
+            ),
+          );
+        case 3:
+          return PieChartSectionData(
+            color: Colors.green,
+            value: 15,
+            title: '15%',
+            radius: radius,
+            titleStyle: TextStyle(
+              fontSize: fontSize,
+              fontWeight: FontWeight.bold,
+              color: Repository.textColor(context),
+              shadows: shadows,
+            ),
+          );
+        default:
+          throw Error();
+      }
+    });
   }
 }
