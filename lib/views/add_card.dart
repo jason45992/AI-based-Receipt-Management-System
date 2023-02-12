@@ -1,14 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:tripo/generated/assets.dart';
 import 'package:tripo/repo/repository.dart';
 import 'package:tripo/utils/layouts.dart';
 import 'package:tripo/utils/size_config.dart';
-import 'package:tripo/utils/styles.dart';
 import 'package:tripo/widgets/buttons.dart';
-import 'package:tripo/widgets/default_text_field.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 import 'package:tripo/widgets/my_app_bar.dart';
 import 'package:gap/gap.dart';
 
@@ -22,7 +18,7 @@ class AddCard extends StatefulWidget {
 
 class _AddCardState extends State<AddCard> {
   String imagePath = '';
-
+  String saveButtonText = 'Save to Album';
   late Map<String, dynamic> _currentTransaction;
   @override
   void initState() {
@@ -108,8 +104,26 @@ class _AddCardState extends State<AddCard> {
                     elevatedButton(
                         color: Repository.selectedItemColor(context),
                         context: context,
+                        text: saveButtonText,
+                        callback: () {
+                          GallerySaver.saveImage(imagePath + '&ext=.jpg')
+                              .then((value) {
+                            setState(() {
+                              saveButtonText = 'Image saved';
+                            });
+                          }).onError((error, stackTrace) {
+                            print(error);
+                            setState(() {
+                              saveButtonText = 'Please try again';
+                            });
+                          });
+                        }),
+                    const Gap(10),
+                    elevatedButton(
+                        color: Repository.selectedItemColor(context),
+                        context: context,
                         text: 'Delete Receipt',
-                        callback: () async {}),
+                        callback: () {}),
                   ]),
                 )
               ],

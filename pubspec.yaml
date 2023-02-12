@@ -47,6 +47,9 @@ dependencies:
   document_scanner_flutter: ^0.2.7
   firebase_storage: ^11.0.10
   iconly: ^1.0.1
+  gallery_saver: ^2.3.2
+  percent_indicator: ^4.2.2
+  animated_toggle_switch: ^0.6.1
 
 
 dev_dependencies:

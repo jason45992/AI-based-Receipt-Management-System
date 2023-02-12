@@ -441,16 +441,27 @@ class _HomeState extends State<Home> {
 
   List<PieChartSectionData> showingSections() {
     List<PieChartSectionData> result = [];
+
+    double totalAllAmount = 0;
+    for (var element in transactions) {
+      totalAllAmount += double.parse(element['total_amount']);
+    }
     var categoryMap = groupBy(transactions, (Map obj) => obj['category']);
     List<dynamic> keys = categoryMap.keys.toList();
     if (categoryMap.isNotEmpty) {
       categoryMap.forEach((i, value) {
         int index = keys.indexOf(i);
-        double percent = ((value.length / transactions.length)).toPrecision(2);
+
+        double totalCategoryAmount = 0;
+        for (var element in value) {
+          totalCategoryAmount += double.parse(element['total_amount']);
+        }
+        double percent =
+            ((totalCategoryAmount / totalAllAmount)).toPrecision(3);
         final isTouched = index == touchedIndex;
-        final fontSize = isTouched ? 22.0 : 16.0;
+        final fontSize = isTouched ? 22.0 : 14.0;
         final radius = isTouched ? 60.0 : 50.0;
-        const shadows = [Shadow(color: Colors.black, blurRadius: 2)];
+        const shadows = [Shadow(color: Colors.black, blurRadius: 1)];
         result.add(PieChartSectionData(
           color: getIconColor(i.toString()),
           value: percent,
@@ -470,7 +481,6 @@ class _HomeState extends State<Home> {
 
   List<Widget> getIndicator() {
     List<Widget> result = [];
-
     var categoryMap = groupBy(transactions, (Map obj) => obj['category']);
     List<dynamic> keys = categoryMap.keys.toList();
     keys.forEachIndexed((index, element) {

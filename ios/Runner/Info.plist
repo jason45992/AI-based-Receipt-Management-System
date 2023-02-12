@@ -47,6 +47,8 @@
 	</array>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Allow access to photo library</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Allow save image to photo library</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 </dict>

@@ -36,7 +36,7 @@ class _BottomNavState extends State<BottomNav> {
       _widgetOptions = <Widget>[
         Home(user: user!),
         Wallet(user: user!),
-        const Stats(),
+        Stats(user: user!),
         Profile(user: user!),
       ];
     }
