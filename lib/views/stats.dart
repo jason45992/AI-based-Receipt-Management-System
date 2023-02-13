@@ -11,6 +11,8 @@ import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 
+import '../widgets/not_found.dart';
+
 class Stats extends StatefulWidget {
   final User user;
   const Stats({required this.user});
@@ -207,97 +209,103 @@ class _StatsState extends State<Stats> {
 
   List<Widget> getCategoryPercent() {
     List<Widget> result = [];
-    List<Map<String, dynamic>> resultsMap = [];
-    var categoryMap = groupBy(transactions, (Map obj) => obj['category']);
+    if (transactions.isEmpty) {
+      result.add(notFound());
+    } else {
+      List<Map<String, dynamic>> resultsMap = [];
+      var categoryMap = groupBy(transactions, (Map obj) => obj['category']);
 
-    if (categoryMap.isNotEmpty) {
-      categoryMap.forEach((i, value) {
-        double totalCategoryAmount = 0;
-        for (var element in value) {
-          totalCategoryAmount += double.parse(element['total_amount']);
-        }
-        double percent = ((totalCategoryAmount / totalExpenses)).toPrecision(3);
+      if (categoryMap.isNotEmpty) {
+        categoryMap.forEach((i, value) {
+          double totalCategoryAmount = 0;
+          for (var element in value) {
+            totalCategoryAmount += double.parse(element['total_amount']);
+          }
+          double percent =
+              ((totalCategoryAmount / totalExpenses)).toPrecision(3);
 
-        var item = {
-          'key': i,
-          'percent': percent,
-          'totalCategoryAmount': totalCategoryAmount
-        };
-        resultsMap.add(item);
-      });
+          var item = {
+            'key': i,
+            'percent': percent,
+            'totalCategoryAmount': totalCategoryAmount
+          };
+          resultsMap.add(item);
+        });
 
-      if (resultsMap.isNotEmpty) {
-        resultsMap.sort((e1, e2) => e2['percent'].compareTo(e1['percent']));
-        for (var element in resultsMap) {
-          result.add(Container(
-            padding: const EdgeInsets.fromLTRB(10, 5, 0, 5),
-            width: double.infinity,
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                color: Repository.accentColor2(context),
-                border: Border.all(color: Repository.accentColor(context))),
-            child: Row(
-              // mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Icon(
-                  getIcon(element['key']),
-                  color: getIconColor(element['key']),
-                  size: 30,
-                ),
-                Column(
-                  // mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                        width: 300,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              element['key'] +
-                                  ' ' +
-                                  (double.parse(element['percent'].toString()) *
-                                          100)
-                                      .toPrecision(1)
-                                      .toString() +
-                                  '%',
-                              style: TextStyle(
-                                  fontSize: 15,
-                                  color: Repository.textColor(context)),
-                            ),
-                            Text(
-                              '\$' +
-                                  double.parse(element['totalCategoryAmount']
-                                          .toString())
-                                      .toPrecision(2)
-                                      .toStringAsFixed(2),
-                              style: TextStyle(
-                                  fontSize: 15,
-                                  color: Repository.textColor(context)),
-                            ),
-                          ],
-                        )),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0.0, 10, 0, 10),
-                      child: LinearPercentIndicator(
-                        barRadius: const Radius.circular(100),
-                        width: MediaQuery.of(context).size.width - 72,
-                        animation: true,
-                        lineHeight: 10.0,
-                        animationDuration: 500,
-                        percent: double.parse(element['percent'].toString())
-                            .toPrecision(2),
-                        // center: Text("80.0%"),
-                        progressColor: getIconColor(element['key']),
-                      ),
-                    )
-                  ],
-                ),
-              ],
-            ),
-          ));
-          result.add(const SizedBox(
-            height: 10,
-          ));
+        if (resultsMap.isNotEmpty) {
+          resultsMap.sort((e1, e2) => e2['percent'].compareTo(e1['percent']));
+          for (var element in resultsMap) {
+            result.add(Container(
+              padding: const EdgeInsets.fromLTRB(10, 5, 0, 5),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  color: Repository.accentColor2(context),
+                  border: Border.all(color: Repository.accentColor(context))),
+              child: Row(
+                // mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Icon(
+                    getIcon(element['key']),
+                    color: getIconColor(element['key']),
+                    size: 30,
+                  ),
+                  Column(
+                    // mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                          width: 300,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                element['key'] +
+                                    ' ' +
+                                    (double.parse(
+                                                element['percent'].toString()) *
+                                            100)
+                                        .toPrecision(1)
+                                        .toString() +
+                                    '%',
+                                style: TextStyle(
+                                    fontSize: 15,
+                                    color: Repository.textColor(context)),
+                              ),
+                              Text(
+                                '\$' +
+                                    double.parse(element['totalCategoryAmount']
+                                            .toString())
+                                        .toPrecision(2)
+                                        .toStringAsFixed(2),
+                                style: TextStyle(
+                                    fontSize: 15,
+                                    color: Repository.textColor(context)),
+                              ),
+                            ],
+                          )),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0.0, 10, 0, 10),
+                        child: LinearPercentIndicator(
+                          barRadius: const Radius.circular(100),
+                          width: MediaQuery.of(context).size.width - 72,
+                          animation: true,
+                          lineHeight: 10.0,
+                          animationDuration: 500,
+                          percent: double.parse(element['percent'].toString())
+                              .toPrecision(2),
+                          // center: Text("80.0%"),
+                          progressColor: getIconColor(element['key']),
+                        ),
+                      )
+                    ],
+                  ),
+                ],
+              ),
+            ));
+            result.add(const SizedBox(
+              height: 10,
+            ));
+          }
         }
       }
     }

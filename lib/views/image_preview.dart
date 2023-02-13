@@ -38,9 +38,12 @@ class _ImagePreviewState extends State<ImagePreview> {
 
   late Image resultImg;
   String receiptVendorName = '';
+  String receiptVendorAddress = '';
   String receiptDateTime = '';
   String receiptCategory = 'Others';
   String receiptTotalPrice = '';
+  double lat = 0;
+  double lng = 0;
 
   @override
   void initState() {
@@ -234,6 +237,8 @@ class _ImagePreviewState extends State<ImagePreview> {
             receiptTotalPrice = element['Value'];
           } else if (element['Type'] == 'supplier_name') {
             receiptVendorName = element['Value'];
+          } else if (element['Type'] == 'supplier_address') {
+            receiptVendorAddress = element['Value'];
           } else if (element['Type'] == 'receipt_date') {
             receiptDate = element['Value'];
           } else if (element['Type'] == 'purchase_time') {
@@ -252,11 +257,18 @@ class _ImagePreviewState extends State<ImagePreview> {
           // get category
           // Optionally the request above could also be done as
           Response cateResponse = await dio.get(
-              'https://maps.googleapis.com/maps/api/place/findplacefromtext/json?fields=name%2Cformatted_address%2Ctype&inputtype=textquery',
+              'https://maps.googleapis.com/maps/api/place/findplacefromtext/json?fields=name%2Cformatted_address%2Ctype%2Cgeometry&inputtype=textquery',
               queryParameters: {
-                'input': receiptVendorName,
+                'input': receiptVendorName + ' ' + receiptVendorAddress,
                 'key': 'AIzaSyBEpmr8uq2K8mqIEND9eIBe_FTjbdx9oRI'
               });
+          print(cateResponse);
+
+          //set location
+          lat =
+              cateResponse.data['candidates'][0]['geometry']['location']['lat'];
+          lng =
+              cateResponse.data['candidates'][0]['geometry']['location']['lng'];
 
           //set category
           List<dynamic> returnedCateList =
@@ -306,7 +318,9 @@ class _ImagePreviewState extends State<ImagePreview> {
         'category': receiptCategory,
         'total_amount': _receiptAmount.text,
         'image_url': downloadUrl,
-        'user_email': currentUser?.email
+        'user_email': currentUser?.email,
+        'lat': lat,
+        'lng': lng
       };
 
       db.collection('receipts').add(receiptInfo).then((DocumentReference doc) =>

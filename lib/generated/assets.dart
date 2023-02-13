@@ -27,5 +27,4 @@ class Assets {
   static const String appLogo = 'assets/img/logo-ios.png';
   static const String androidLogo = 'assets/img/logo-android.png';
   static const String background = 'assets/img/onboard-background.png';
-  static const String testImg = 'assets/img/sample3.jpg';
 }

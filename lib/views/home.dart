@@ -17,6 +17,7 @@ import 'package:tripo/views/image_preview.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
+import 'package:tripo/widgets/not_found.dart';
 
 class Home extends StatefulWidget {
   final User user;
@@ -285,49 +286,7 @@ class _HomeState extends State<Home> {
                 MediaQuery.removePadding(
                   removeTop: true,
                   context: context,
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: transactions.length,
-                    itemBuilder: (c, i) {
-                      final trs = transactions[i];
-                      return ListTile(
-                        isThreeLine: true,
-                        minLeadingWidth: 10,
-                        minVerticalPadding: 20,
-                        contentPadding: const EdgeInsets.all(0),
-                        leading: Container(
-                            width: 40,
-                            height: 40,
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Repository.accentColor(context),
-                              boxShadow: [
-                                BoxShadow(
-                                  offset: const Offset(0, 1),
-                                  color: Colors.white.withOpacity(0.1),
-                                  blurRadius: 2,
-                                  spreadRadius: 1,
-                                )
-                              ],
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(trs['icon'],
-                                color: trs['iconColor'], size: 20)),
-                        title: Text(trs['vendor_name'],
-                            style: TextStyle(
-                                color: Repository.textColor(context),
-                                fontWeight: FontWeight.w500)),
-                        subtitle: Text(trs['date_time'],
-                            style: TextStyle(
-                                color: Repository.subTextColor(context))),
-                        trailing: Text(trs['total_amount'],
-                            style: TextStyle(
-                                fontSize: 17,
-                                color: Repository.subTextColor(context))),
-                      );
-                    },
-                  ),
+                  child: getTransactionList(),
                 ),
               ],
             ),
@@ -437,6 +396,53 @@ class _HomeState extends State<Home> {
         break;
     }
     setState(() {});
+  }
+
+  Widget getTransactionList() {
+    if (transactions.isEmpty) {
+      return notFound();
+    } else {
+      return ListView.builder(
+        shrinkWrap: true,
+        physics: const BouncingScrollPhysics(),
+        itemCount: transactions.length,
+        itemBuilder: (c, i) {
+          final trs = transactions[i];
+          return ListTile(
+            isThreeLine: true,
+            minLeadingWidth: 10,
+            minVerticalPadding: 20,
+            contentPadding: const EdgeInsets.all(0),
+            leading: Container(
+                width: 40,
+                height: 40,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Repository.accentColor(context),
+                  boxShadow: [
+                    BoxShadow(
+                      offset: const Offset(0, 1),
+                      color: Colors.white.withOpacity(0.1),
+                      blurRadius: 2,
+                      spreadRadius: 1,
+                    )
+                  ],
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(trs['icon'], color: trs['iconColor'], size: 20)),
+            title: Text(trs['vendor_name'],
+                style: TextStyle(
+                    color: Repository.textColor(context),
+                    fontWeight: FontWeight.w500)),
+            subtitle: Text(trs['date_time'],
+                style: TextStyle(color: Repository.subTextColor(context))),
+            trailing: Text(trs['total_amount'],
+                style: TextStyle(
+                    fontSize: 17, color: Repository.subTextColor(context))),
+          );
+        },
+      );
+    }
   }
 
   List<PieChartSectionData> showingSections() {
