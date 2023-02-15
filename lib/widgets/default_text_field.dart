@@ -17,6 +17,7 @@ class DefaultTextField extends StatelessWidget {
       this.suffixIcon,
       this.keyboardType,
       this.onFieldSubmitted,
+      this.onTap,
       this.textInputAction,
       this.enabled,
       this.label})
@@ -33,6 +34,7 @@ class DefaultTextField extends StatelessWidget {
   final IconData? prefixIcon;
   final TextInputType? keyboardType;
   final ValueChanged<String>? onFieldSubmitted;
+  final GestureTapCallback? onTap;
   final TextInputAction? textInputAction;
   final bool? enabled;
   String get _title => title;
@@ -64,6 +66,7 @@ class DefaultTextField extends StatelessWidget {
           cursorColor: Repository.textColor(context),
           textInputAction: textInputAction ?? TextInputAction.next,
           onFieldSubmitted: onFieldSubmitted,
+          onTap: onTap,
           validator: (value) {
             if (value!.isEmpty) {
               return 'Value cannot be empty';

@@ -51,6 +51,8 @@ dependencies:
   percent_indicator: ^4.2.2
   animated_toggle_switch: ^0.6.1
   google_maps_flutter: ^2.2.3
+  sticky_grouped_list: ^3.1.0
+  carousel_slider: ^4.2.1
 
 
 dev_dependencies:

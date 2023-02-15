@@ -10,20 +10,20 @@ import 'package:gallery_saver/gallery_saver.dart';
 import 'package:tripo/widgets/my_app_bar.dart';
 import 'package:gap/gap.dart';
 
-class AddCard extends StatefulWidget {
+class ReceiptDetail extends StatefulWidget {
   final Map<String, dynamic> transaction;
-  const AddCard({required this.transaction});
+  const ReceiptDetail({required this.transaction});
 
   @override
-  _AddCardState createState() => _AddCardState();
+  _ReceiptDetailState createState() => _ReceiptDetailState();
 }
 
-class _AddCardState extends State<AddCard> {
+class _ReceiptDetailState extends State<ReceiptDetail> {
   String imagePath = '';
   String saveButtonText = 'Save to Album';
   late Map<String, dynamic> _currentTransaction;
   late GoogleMapController mapController;
-  LatLng _center = const LatLng(1.3226141, 103.8637382);
+  LatLng _center = const LatLng(0, 0);
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
@@ -33,7 +33,8 @@ class _AddCardState extends State<AddCard> {
   void initState() {
     _currentTransaction = widget.transaction;
     imagePath = _currentTransaction['image_url'];
-    _center = LatLng(_currentTransaction['lat'], _currentTransaction['lng']);
+    _center = LatLng(_currentTransaction['lat'].toDouble(),
+        _currentTransaction['lng'].toDouble());
     super.initState();
   }
 
@@ -110,23 +111,25 @@ class _AddCardState extends State<AddCard> {
                           ),
                           const Gap(5),
                         ]),
-                    SizedBox(
-                      height: 200,
-                      child: GoogleMap(
-                        onMapCreated: _onMapCreated,
-                        initialCameraPosition: CameraPosition(
-                          target: _center,
-                          zoom: 16,
-                        ),
-                        markers: {
-                          Marker(
-                            markerId: const MarkerId('marker_1'),
-                            position: _center,
-                          )
-                        },
-                        myLocationButtonEnabled: false,
-                      ),
-                    ),
+                    _center.latitude == 0
+                        ? const Gap(0)
+                        : SizedBox(
+                            height: 200,
+                            child: GoogleMap(
+                              onMapCreated: _onMapCreated,
+                              initialCameraPosition: CameraPosition(
+                                target: _center,
+                                zoom: 16,
+                              ),
+                              markers: {
+                                Marker(
+                                  markerId: const MarkerId('marker_1'),
+                                  position: _center,
+                                )
+                              },
+                              myLocationButtonEnabled: false,
+                            ),
+                          ),
                     const Gap(20),
                     elevatedButton(
                         color: Repository.selectedItemColor(context),

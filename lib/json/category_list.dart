@@ -24,7 +24,7 @@ List<List<String>> categoryList = [
     'physiotherapist',
     'spa'
   ],
-  ['Transport', 'car', 'subway_station', 'bus_station', 'taxi_stand', 'parking']
+  ['transport', 'car', 'subway_station', 'bus_station', 'taxi_stand', 'parking']
 ];
 
 final List<String> categoryItems = [
@@ -47,6 +47,8 @@ IconData getIcon(String category) {
       return Icons.store;
     case 'Shopping':
       return Icons.shopping_cart;
+    case 'Entertainment':
+      return Icons.movie;
     case 'Health':
       return Icons.health_and_safety;
     case 'Transport':
@@ -65,6 +67,8 @@ Color getIconColor(String category) {
       return const Color.fromARGB(255, 105, 100, 157);
     case 'Shopping':
       return const Color.fromARGB(255, 83, 118, 53);
+    case 'Entertainment':
+      return const Color.fromARGB(255, 58, 132, 188);
     case 'Health':
       return const Color.fromARGB(255, 207, 186, 66);
     case 'Transport':

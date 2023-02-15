@@ -6,7 +6,7 @@ import 'package:tripo/utils/styles.dart';
 import 'package:tripo/views/home.dart';
 import 'package:tripo/views/profile.dart';
 import 'package:tripo/views/stats.dart';
-import 'package:tripo/views/wallet.dart';
+import 'package:tripo/views/receipt_management.dart';
 
 /// This is the stateful widget that the main application instantiates.
 class BottomNav extends StatefulWidget {
@@ -35,7 +35,7 @@ class _BottomNavState extends State<BottomNav> {
     if (user != null) {
       _widgetOptions = <Widget>[
         Home(user: user!),
-        Wallet(user: user!),
+        ReceiptManagement(user: user!),
         Stats(user: user!),
         Profile(user: user!),
       ];

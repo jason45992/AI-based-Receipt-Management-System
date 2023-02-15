@@ -3,6 +3,7 @@ import 'package:document_scanner_flutter/configs/configs.dart';
 import 'package:document_scanner_flutter/document_scanner_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:sticky_grouped_list/sticky_grouped_list.dart';
 import 'package:tripo/utils/pie_chart_indicator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ import 'package:tripo/utils/layouts.dart';
 import 'package:tripo/utils/size_config.dart';
 import 'package:tripo/utils/styles.dart';
 import 'package:tripo/utils/functions.dart';
+import 'package:tripo/views/add_receipt.dart';
 import 'package:tripo/views/image_preview.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
@@ -42,19 +44,21 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> getImage(String type) async {
-    ScannerFileSource source = ScannerFileSource.CAMERA;
-    if (type != 'camera') {
-      source = ScannerFileSource.GALLERY;
-    }
-    var image = await DocumentScannerFlutter.launch(context, source: source);
-    if (image != null) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => ImagePreview(
-                    imagePath: image.path,
-                  )));
-    }
+    // ScannerFileSource source = ScannerFileSource.CAMERA;
+    // if (type != 'camera') {
+    //   source = ScannerFileSource.GALLERY;
+    // }
+    // var image = await DocumentScannerFlutter.launch(context, source: source);
+    // if (image != null) {
+    //   Navigator.push(
+    //       context,
+    //       MaterialPageRoute(
+    //           builder: (context) => ImagePreview(
+    //                 imagePath: image.path,
+    //               )));
+    // }
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => AddReceipt()));
   }
 
   @override
@@ -308,6 +312,7 @@ class _HomeState extends State<Home> {
             .collection('receipts')
             .where('user_email', isEqualTo: _currentUser.email)
             .orderBy('date_time', descending: true)
+            .limit(100)
             .get()
             .then(
               (res) => res.docs.forEach((element) {
@@ -402,10 +407,10 @@ class _HomeState extends State<Home> {
     if (transactions.isEmpty) {
       return notFound();
     } else {
-      return ListView.builder(
+      return ListView.separated(
+        itemCount: transactions.length,
         shrinkWrap: true,
         physics: const BouncingScrollPhysics(),
-        itemCount: transactions.length,
         itemBuilder: (c, i) {
           final trs = transactions[i];
           return ListTile(
@@ -439,6 +444,11 @@ class _HomeState extends State<Home> {
             trailing: Text(trs['total_amount'],
                 style: TextStyle(
                     fontSize: 17, color: Repository.subTextColor(context))),
+          );
+        },
+        separatorBuilder: (context, index) {
+          return const Divider(
+            height: 1,
           );
         },
       );
