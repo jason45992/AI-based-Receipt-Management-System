@@ -3,7 +3,6 @@ import 'package:document_scanner_flutter/configs/configs.dart';
 import 'package:document_scanner_flutter/document_scanner_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:sticky_grouped_list/sticky_grouped_list.dart';
 import 'package:tripo/utils/pie_chart_indicator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -44,26 +43,19 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> getImage(String type) async {
-    // ScannerFileSource source = ScannerFileSource.CAMERA;
-    // if (type != 'camera') {
-    //   source = ScannerFileSource.GALLERY;
-    // }
-    // var image = await DocumentScannerFlutter.launch(context, source: source);
-    // if (image != null) {
-    //   Navigator.push(
-    //       context,
-    //       MaterialPageRoute(
-    //           builder: (context) => ImagePreview(
-    //                 imagePath: image.path,
-    //               )));
-    // }
-    Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const AddReceipt()))
-        .then((value) => setState(
-              () {
-                getTransactions();
-              },
-            ));
+    ScannerFileSource source = ScannerFileSource.CAMERA;
+    if (type != 'camera') {
+      source = ScannerFileSource.GALLERY;
+    }
+    var image = await DocumentScannerFlutter.launch(context, source: source);
+    if (image != null) {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ImagePreview(
+                    imagePath: image.path,
+                  ))).then((value) => getTransactions());
+    }
   }
 
   @override
@@ -177,7 +169,7 @@ class _HomeState extends State<Home> {
                 const Gap(15),
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(15),
                     color: Repository.accentColor(context),
@@ -200,7 +192,7 @@ class _HomeState extends State<Home> {
                         },
                         child: Container(
                           padding: const EdgeInsets.all(16),
-                          width: 150,
+                          width: 100,
                           decoration: BoxDecoration(
                             shape: BoxShape.rectangle,
                             borderRadius: BorderRadius.circular(20.0),
@@ -226,11 +218,45 @@ class _HomeState extends State<Home> {
                         },
                         child: Container(
                           padding: const EdgeInsets.all(16),
-                          width: 150,
+                          width: 120,
                           decoration: BoxDecoration(
                             shape: BoxShape.rectangle,
                             borderRadius: BorderRadius.circular(20.0),
-                            color: Colors.orange.withOpacity(0.5),
+                            color: Colors.grey.withOpacity(0.15),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Icon(IconlyBold.upload,
+                                  color: Repository.textColor(context)),
+                              Text('Upload',
+                                  style: TextStyle(
+                                      color: Repository.textColor(context),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18.0))
+                            ],
+                          ),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const AddReceipt()))
+                              .then((value) => setState(
+                                    () {
+                                      getTransactions();
+                                    },
+                                  ));
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          width: 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.rectangle,
+                            borderRadius: BorderRadius.circular(20.0),
+                            color: Colors.grey.withOpacity(0.15),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,

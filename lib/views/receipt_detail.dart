@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -7,7 +8,6 @@ import 'package:photo_view/photo_view.dart';
 import 'package:tripo/repo/repository.dart';
 import 'package:tripo/utils/layouts.dart';
 import 'package:tripo/utils/size_config.dart';
-import 'package:tripo/widgets/bottom_nav.dart';
 import 'package:tripo/widgets/buttons.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:tripo/widgets/my_app_bar.dart';
@@ -198,8 +198,18 @@ class _ReceiptDetailState extends State<ReceiptDetail> {
     );
   }
 
-  deleteReceipt() {
+  deleteReceipt() async {
     final db = FirebaseFirestore.instance;
+    final _firebaseStorage = FirebaseStorage.instance;
+    // Create a reference to the file to delete
+    if (imagePath.isNotEmpty) {
+      final desertRef = _firebaseStorage.ref().child('images/' +
+          imagePath.split('images%2F')[1].split('.jpg')[0] +
+          '.jpg');
+      // Delete the file
+      await desertRef.delete();
+    }
+
     db
         .collection('receipts')
         .doc(_currentTransaction['id'])

@@ -140,11 +140,7 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
                       MaterialPageRoute(
                           builder: (context) =>
                               ReceiptDetail(transaction: element)))
-                  .then((value) => setState(
-                        () {
-                          getTransactions();
-                        },
-                      ))),
+                  .then((value) => getTransactions())),
               isThreeLine: true,
               minLeadingWidth: 10,
               minVerticalPadding: 20,

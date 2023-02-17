@@ -1,7 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -10,8 +9,6 @@ import 'package:tripo/repo/repository.dart';
 import 'package:intl/intl.dart';
 import 'package:tripo/utils/functions.dart';
 import 'package:tripo/utils/validation.dart';
-import 'package:tripo/views/home.dart';
-import 'package:tripo/widgets/bottom_nav.dart';
 import 'package:tripo/widgets/buttons.dart';
 import 'package:tripo/widgets/default_text_field.dart';
 import 'package:tripo/widgets/my_app_bar.dart';
@@ -27,7 +24,7 @@ class _AddReceiptState extends State<AddReceipt> {
   User? currentUser;
   int _current = 0;
   List<bool> isSelectedWarranty = [false, true];
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  GlobalKey<FormState> addFormKey = GlobalKey<FormState>();
   final TextEditingController _vendorName = TextEditingController();
   final TextEditingController _receiptAmount = TextEditingController();
   final TextEditingController _receiptDate = TextEditingController();
@@ -51,7 +48,7 @@ class _AddReceiptState extends State<AddReceipt> {
             appBar: myAppBar(
                 title: 'Add Receipt', implyLeading: true, context: context),
             body: Form(
-              key: formKey,
+              key: addFormKey,
               child: ListView(children: [
                 CarouselSlider.builder(
                     options: CarouselOptions(
@@ -263,7 +260,7 @@ class _AddReceiptState extends State<AddReceipt> {
                         text: 'Add Receipt',
                         callback: () {
                           print('Form Valid? ');
-                          print(formKey.currentState?.validate().toString());
+                          print(addFormKey.currentState?.validate().toString());
                           submitForm();
                         }))
               ]),

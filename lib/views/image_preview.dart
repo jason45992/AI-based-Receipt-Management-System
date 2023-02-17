@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_button2/custom_dropdown_button2.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:tripo/utils/functions.dart';
 import 'package:flutter/material.dart';
 import 'package:tripo/repo/repository.dart';
@@ -29,9 +30,11 @@ class ImagePreview extends StatefulWidget {
 }
 
 class _ImagePreviewState extends State<ImagePreview> {
-  var imagePath;
+  String imagePath = '';
   User? currentUser;
   String orignalImgPath = '';
+  List<bool> isSelectedWarranty = [false, true];
+  GlobalKey<FormState> autoAddFormKey = GlobalKey<FormState>();
   final TextEditingController _vendor = TextEditingController();
   final TextEditingController _receiptDate = TextEditingController();
   final TextEditingController _receiptAmount = TextEditingController();
@@ -42,6 +45,7 @@ class _ImagePreviewState extends State<ImagePreview> {
   String receiptDateTime = '';
   String receiptCategory = 'Others';
   String receiptTotalPrice = '';
+  String _receiptWarranty = 'No';
   double lat = 0;
   double lng = 0;
 
@@ -95,111 +99,229 @@ class _ImagePreviewState extends State<ImagePreview> {
                               ),
                             ),
                             const Gap(20),
-                            Expanded(
-                              child: ListView(children: [
-                                DefaultTextField(
-                                    controller: _vendor,
-                                    title: 'Vendor Name',
-                                    label: receiptVendorName),
-                                DefaultTextField(
-                                    controller: _receiptDate,
-                                    title: 'Date Time',
-                                    label: receiptDateTime),
-                                Row(
-                                  children: [
-                                    Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Category',
-                                            style: TextStyle(
-                                                color: Repository.textColor(
-                                                    context),
-                                                fontWeight: FontWeight.w500,
-                                                fontSize: 15),
-                                            // textAlign: TextAlign.left,
-                                          ),
-                                          const Gap(5),
-                                          CustomDropdownButton2(
-                                              hint: '',
-                                              value: receiptCategory,
-                                              icon: Icon(
-                                                Icons.arrow_drop_down,
-                                                color: Repository.fieldColor(
-                                                    context),
-                                              ),
-                                              iconSize: 30,
-                                              buttonHeight: 50,
-                                              buttonWidth: 180,
-                                              dropdownDecoration: BoxDecoration(
-                                                color: Repository.cardColor3(
-                                                    context),
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                              ),
-                                              buttonDecoration: BoxDecoration(
-                                                border: Border.all(
-                                                  width: 1.5,
-                                                  color: Styles.darkGreyColor,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                              ),
-                                              selectedItemBuilder: (context) {
-                                                return categoryItems.map(
-                                                  (item) {
-                                                    return Container(
-                                                      alignment:
-                                                          AlignmentDirectional
-                                                              .centerStart,
-                                                      child: Text(
-                                                        receiptCategory,
-                                                        style: TextStyle(
-                                                          fontSize: 15,
-                                                          color: Repository
-                                                              .textColor(
-                                                                  context),
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                        ),
-                                                        maxLines: 1,
-                                                      ),
-                                                    );
-                                                  },
-                                                ).toList();
-                                              },
-                                              dropdownItems: categoryItems,
-                                              onChanged: (value) {
-                                                receiptCategory =
-                                                    value.toString();
-                                              }),
-                                          const Gap(10),
-                                        ]),
-                                    const Gap(20),
-                                    Flexible(
-                                      child: DefaultTextField(
-                                          controller: _receiptAmount,
-                                          title: 'Total Price',
-                                          label: receiptTotalPrice),
+                            Form(
+                                key: autoAddFormKey,
+                                child: Expanded(
+                                  child: ListView(children: [
+                                    DefaultTextField(
+                                        controller: _vendor,
+                                        title: 'Vendor Name',
+                                        label: receiptVendorName),
+                                    DefaultTextField(
+                                      controller: _receiptDate,
+                                      title: 'Date Time',
+                                      label: receiptDateTime,
+                                      validator: (value) {
+                                        if (value!.isEmpty) {
+                                          return 'Value cannot be empty';
+                                        } else if (!isValidDate(
+                                            value, 'dd/MM/yyyy HH:mm')) {
+                                          return 'PLease enter a valid date (dd/MM/yyyy HH:mm)';
+                                        }
+                                      },
                                     ),
-                                  ],
-                                ),
-                                const Gap(10),
-                                elevatedButton(
-                                    color:
-                                        Repository.selectedItemColor(context),
-                                    context: context,
-                                    text: 'Add Receipt',
-                                    callback: () async {
-                                      print(_vendor.text);
-                                      print(_receiptDate.text);
-                                      print(receiptCategory);
-                                      print(_receiptAmount.text);
-                                      uploadImage();
-                                    }),
-                              ]),
-                            )
+                                    Row(
+                                      children: [
+                                        Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Category',
+                                                style: TextStyle(
+                                                    color: Repository.textColor(
+                                                        context),
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 15),
+                                                // textAlign: TextAlign.left,
+                                              ),
+                                              const Gap(5),
+                                              CustomDropdownButton2(
+                                                  hint: '',
+                                                  value: receiptCategory,
+                                                  icon: Icon(
+                                                    Icons.arrow_drop_down,
+                                                    color:
+                                                        Repository.fieldColor(
+                                                            context),
+                                                  ),
+                                                  iconSize: 30,
+                                                  buttonHeight: 50,
+                                                  buttonWidth: 180,
+                                                  dropdownDecoration:
+                                                      BoxDecoration(
+                                                    color:
+                                                        Repository.cardColor3(
+                                                            context),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                  ),
+                                                  buttonDecoration:
+                                                      BoxDecoration(
+                                                    border: Border.all(
+                                                      width: 1.5,
+                                                      color:
+                                                          Styles.darkGreyColor,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                  ),
+                                                  selectedItemBuilder:
+                                                      (context) {
+                                                    return categoryItems.map(
+                                                      (item) {
+                                                        return Container(
+                                                          alignment:
+                                                              AlignmentDirectional
+                                                                  .centerStart,
+                                                          child: Text(
+                                                            receiptCategory,
+                                                            style: TextStyle(
+                                                              fontSize: 15,
+                                                              color: Repository
+                                                                  .textColor(
+                                                                      context),
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            ),
+                                                            maxLines: 1,
+                                                          ),
+                                                        );
+                                                      },
+                                                    ).toList();
+                                                  },
+                                                  dropdownItems: categoryItems,
+                                                  onChanged: (value) {
+                                                    receiptCategory =
+                                                        value.toString();
+                                                  }),
+                                              const Gap(10),
+                                            ]),
+                                        const Gap(20),
+                                        Flexible(
+                                            child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                              Text(
+                                                'Warranty',
+                                                style: TextStyle(
+                                                    color: Repository.textColor(
+                                                        context),
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 15),
+                                                // textAlign: TextAlign.left,
+                                              ),
+                                              const Gap(5),
+                                              CustomDropdownButton2(
+                                                  hint: '',
+                                                  value: _receiptWarranty,
+                                                  icon: Icon(
+                                                    Icons.arrow_drop_down,
+                                                    color:
+                                                        Repository.fieldColor(
+                                                            context),
+                                                  ),
+                                                  iconSize: 30,
+                                                  buttonHeight: 50,
+                                                  buttonWidth: 180,
+                                                  dropdownDecoration:
+                                                      BoxDecoration(
+                                                    color:
+                                                        Repository.cardColor3(
+                                                            context),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                  ),
+                                                  buttonDecoration:
+                                                      BoxDecoration(
+                                                    border: Border.all(
+                                                      width: 1.5,
+                                                      color:
+                                                          Styles.darkGreyColor,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                  ),
+                                                  selectedItemBuilder:
+                                                      (context) {
+                                                    return categoryItems.map(
+                                                      (item) {
+                                                        return Container(
+                                                          alignment:
+                                                              AlignmentDirectional
+                                                                  .centerStart,
+                                                          child: Text(
+                                                            _receiptWarranty,
+                                                            style: TextStyle(
+                                                              fontSize: 15,
+                                                              color: Repository
+                                                                  .textColor(
+                                                                      context),
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            ),
+                                                            maxLines: 1,
+                                                          ),
+                                                        );
+                                                      },
+                                                    ).toList();
+                                                  },
+                                                  dropdownItems: const [
+                                                    'Yes',
+                                                    'No'
+                                                  ],
+                                                  onChanged: (value) {
+                                                    _receiptWarranty =
+                                                        value.toString();
+                                                  }),
+                                              const Gap(10),
+                                            ])),
+                                      ],
+                                    ),
+                                    DefaultTextField(
+                                      controller: _receiptAmount,
+                                      title: 'Total Price',
+                                      label: receiptTotalPrice,
+                                      validator: (value) {
+                                        if (value!.isEmpty) {
+                                          return 'Value cannot be empty';
+                                        } else if (!amount.hasMatch(value)) {
+                                          return 'PLease enter amount with 2 decimal place';
+                                        }
+                                      },
+                                    ),
+                                    const Gap(10),
+                                    elevatedButton(
+                                        color: Repository.selectedItemColor(
+                                            context),
+                                        context: context,
+                                        text: 'Add Receipt',
+                                        callback: () async {
+                                          print('Form Valid? ');
+                                          print(autoAddFormKey.currentState
+                                              ?.validate()
+                                              .toString());
+                                          uploadImage();
+                                          //   print(_vendor.text
+                                          //       .capitalizeFistWord());
+                                          //   print(Timestamp.fromDate(DateFormat(
+                                          //           'dd/MM/yyyy HH:mm')
+                                          //       .parseStrict(_receiptDate.text)));
+                                          //   print(receiptCategory);
+                                          //   print(
+                                          //       double.parse(_receiptAmount.text)
+                                          //           .toStringAsFixed(2));
+                                          //   print(_receiptWarranty.toString());
+                                        }),
+                                  ]),
+                                ))
                           ],
                         ));
                   }
@@ -316,18 +438,66 @@ class _ImagePreviewState extends State<ImagePreview> {
         'date_time': Timestamp.fromDate(
             DateFormat('dd/MM/yyyy HH:mm').parseStrict(_receiptDate.text)),
         'category': receiptCategory,
-        'total_amount': _receiptAmount.text,
+        'total_amount': double.parse(_receiptAmount.text).toStringAsFixed(2),
         'image_url': downloadUrl,
         'user_email': currentUser?.email,
         'lat': lat,
-        'lng': lng
+        'lng': lng,
+        'with_warranty': _receiptWarranty == 'Yes'
       };
 
-      db.collection('receipts').add(receiptInfo).then((DocumentReference doc) =>
-          print('DocumentSnapshot added with ID: ${doc.id}'));
+      db.collection('receipts').add(receiptInfo).then((DocumentReference doc) {
+        print('DocumentSnapshot added with ID: ${doc.id}');
+        Navigator.of(context).restorablePush(_dialogSuccessBuilder);
+      }).onError((error, stackTrace) {
+        Navigator.of(context).restorablePush(_dialogFailBuilder);
+      });
     } else {
       print('No Image Path Received');
     }
+  }
+
+  static Route<Object?> _dialogSuccessBuilder(
+      BuildContext context, Object? arguments) {
+    return CupertinoDialogRoute<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: const Text('Success'),
+          content: const Text('Receipt added successfully.'),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static Route<Object?> _dialogFailBuilder(
+      BuildContext context, Object? arguments) {
+    return CupertinoDialogRoute<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: const Text('Error'),
+          content: const Text('Please try again.'),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   String formatDatetime(String date, String time) {
@@ -399,6 +569,10 @@ class _ImagePreviewState extends State<ImagePreview> {
         timeFormat = 'jm';
       } else if (isValidDate(time, 'jms')) {
         timeFormat = 'jms';
+      } else if (isValidDate(time, 'hh:mm a')) {
+        timeFormat = 'hh:mm a';
+      } else if (isValidDate(time, 'hh:mma')) {
+        timeFormat = 'hh:mma';
       }
       if (timeFormat.isNotEmpty) {
         time = DateFormat.Hm().format(DateFormat(timeFormat).parseStrict(time));

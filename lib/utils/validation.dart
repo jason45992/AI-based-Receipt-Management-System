@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 
-RegExp amount = RegExp("^[0-9]*\.[0-9]{2}\$");
+RegExp amount = RegExp('^[0-9]+(?:\.[0-9]{2})?\$');
 
 bool isValidDate(String value, [String? format]) {
   try {
