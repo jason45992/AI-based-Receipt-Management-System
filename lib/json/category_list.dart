@@ -32,6 +32,7 @@ final List<String> categoryItems = [
   'Beauty',
   'Supermarket',
   'Shopping',
+  'Entertainment',
   'Health',
   'Transport',
   'Others'

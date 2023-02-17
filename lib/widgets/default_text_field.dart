@@ -68,10 +68,9 @@ class DefaultTextField extends StatelessWidget {
           onFieldSubmitted: onFieldSubmitted,
           onTap: onTap,
           validator: (value) {
-            if (value!.isEmpty) {
+            if (mandatory && value!.isEmpty) {
               return 'Value cannot be empty';
             }
-
             return validator?.call(value);
           },
           controller: controller,

@@ -136,10 +136,15 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: ListTile(
               onTap: (() => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          ReceiptDetail(transaction: element)))),
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              ReceiptDetail(transaction: element)))
+                  .then((value) => setState(
+                        () {
+                          getTransactions();
+                        },
+                      ))),
               isThreeLine: true,
               minLeadingWidth: 10,
               minVerticalPadding: 20,
@@ -179,7 +184,6 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
   Future<void> getTransactions() async {
     final db = FirebaseFirestore.instance;
     transactions = [];
-    DateTime currentDateTime = DateTime.now();
     await db
         .collection('receipts')
         .where('user_email', isEqualTo: _currentUser.email)
@@ -188,6 +192,7 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
         .then(
           (res) => res.docs.forEach((element) {
             Map<String, dynamic> item = element.data();
+            item['id'] = element.id;
             item['icon'] = getIcon(element.data()['category']);
             item['iconColor'] = getIconColor(element.data()['category']);
             item['date_time'] = DateFormat('dd/MM/yyyy HH:mm')

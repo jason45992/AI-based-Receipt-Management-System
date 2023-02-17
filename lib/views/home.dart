@@ -57,8 +57,13 @@ class _HomeState extends State<Home> {
     //                 imagePath: image.path,
     //               )));
     // }
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => AddReceipt()));
+    Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const AddReceipt()))
+        .then((value) => setState(
+              () {
+                getTransactions();
+              },
+            ));
   }
 
   @override
@@ -118,7 +123,7 @@ class _HomeState extends State<Home> {
                   children: [
                     Container(
                       height: size.height * 0.23,
-                      width: size.width * 0.55,
+                      width: size.width * 0.54,
                       // padding: const EdgeInsets.fromLTRB(16, 10, 0, 20),
                       decoration: BoxDecoration(
                         borderRadius: const BorderRadius.horizontal(
@@ -156,7 +161,7 @@ class _HomeState extends State<Home> {
                     ),
                     Container(
                         height: size.height * 0.23,
-                        width: size.width * 0.35,
+                        width: size.width * 0.36,
                         padding: const EdgeInsets.fromLTRB(10, 10, 0, 20),
                         decoration: BoxDecoration(
                             borderRadius: const BorderRadius.horizontal(
