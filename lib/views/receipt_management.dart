@@ -6,9 +6,11 @@ import 'package:sticky_grouped_list/sticky_grouped_list.dart';
 import 'package:tripo/json/category_list.dart';
 import 'package:tripo/repo/repository.dart';
 import 'package:iconly/iconly.dart';
+import 'package:tripo/utils/input_decoration.dart';
 import 'package:tripo/utils/layouts.dart';
 import 'package:intl/intl.dart';
 import 'package:tripo/views/receipt_detail.dart';
+import 'package:tripo/widgets/default_text_field.dart';
 import 'package:tripo/widgets/my_app_bar.dart';
 import 'package:gap/gap.dart';
 
@@ -23,6 +25,8 @@ class ReceiptManagement extends StatefulWidget {
 class _ReceiptManagementState extends State<ReceiptManagement> {
   late User _currentUser;
   List<Map<String, dynamic>> transactions = [];
+  List<Map<String, dynamic>> filtered_transactions = [];
+  final TextEditingController _searchKey = TextEditingController();
 
   @override
   void initState() {
@@ -40,46 +44,47 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
             myAppBar(title: 'Receipts', implyLeading: false, context: context),
         body: Stack(children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                InkWell(
-                  // onTap: () => Navigator.push(context,
-                  //     MaterialPageRoute(builder: (c) => const AddCard())),
-                  child: Container(
-                    width: size.width * 0.78,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(50),
-                      color: Repository.accentColor(context),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(CupertinoIcons.add,
-                            color: Repository.textColor(context), size: 20),
-                        const Gap(10),
-                        Text('Search Receipt',
-                            style:
-                                TextStyle(color: Repository.textColor(context)))
-                      ],
-                    ),
-                  ),
-                ),
-                CircleAvatar(
-                  backgroundColor: Repository.accentColor(context),
-                  child: Icon(IconlyBroken.search,
-                      color: Repository.textColor(context)),
-                  radius: 23,
-                )
-              ],
-            ),
-          ),
+              padding: const EdgeInsets.symmetric(horizontal: 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                      padding: const EdgeInsets.fromLTRB(20, 5, 10, 5),
+                      alignment: Alignment.center,
+                      width: size.width * 0.85,
+                      height: 50,
+                      // padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(50),
+                        color: Repository.accentColor(context),
+                      ),
+                      child: TextField(
+                        controller: _searchKey,
+                        decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Search receipts'),
+                        onChanged: (value) {
+                          if (value.isNotEmpty) {
+                            setState(() {
+                              filtered_transactions = transactions
+                                  .where((i) => i['vendor_name']
+                                      .toLowerCase()
+                                      .contains(value.toLowerCase()))
+                                  .toList();
+                            });
+                          } else {
+                            setState(() {
+                              filtered_transactions = transactions;
+                            });
+                          }
+                        },
+                      )),
+                ],
+              )),
           Padding(
             padding: const EdgeInsets.fromLTRB(15, 60, 15, 0),
             child: StickyGroupedListView<Map<String, dynamic>, DateTime>(
-              elements: transactions,
+              elements: filtered_transactions,
               order: StickyGroupedListOrder.DESC,
               groupBy: (Map<String, dynamic> element) =>
                   DateFormat('dd/MM/yyyy')
@@ -180,6 +185,7 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
   Future<void> getTransactions() async {
     final db = FirebaseFirestore.instance;
     transactions = [];
+    filtered_transactions = [];
     await db
         .collection('receipts')
         .where('user_email', isEqualTo: _currentUser.email)
@@ -197,6 +203,7 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
           }),
           onError: (e) => print('Error completing: $e'),
         );
+    filtered_transactions = transactions;
     setState(() {});
   }
 }
