@@ -227,7 +227,7 @@ class _HomeState extends State<Home> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              Icon(IconlyBold.upload,
+                              Icon(IconlyBold.image,
                                   color: Repository.textColor(context)),
                               Text('Upload',
                                   style: TextStyle(
@@ -261,7 +261,7 @@ class _HomeState extends State<Home> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              Icon(IconlyBold.image,
+                              Icon(IconlyBold.paper,
                                   color: Repository.textColor(context)),
                               Text('Add',
                                   style: TextStyle(

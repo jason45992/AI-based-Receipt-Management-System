@@ -115,7 +115,8 @@ class _ImagePreviewState extends State<ImagePreview> {
                                         if (value!.isEmpty) {
                                           return 'Value cannot be empty';
                                         } else if (!isValidDate(
-                                            value, 'dd/MM/yyyy HH:mm')) {
+                                                value, 'dd/MM/yyyy HH:mm') ||
+                                            !appDate.hasMatch(value)) {
                                           return 'PLease enter a valid date (dd/MM/yyyy HH:mm)';
                                         }
                                       },
@@ -371,9 +372,9 @@ class _ImagePreviewState extends State<ImagePreview> {
         imagePath = filePath;
         receiptDateTime = formatDatetime(receiptDate, receiptTime);
 
-        _vendor.text = receiptVendorName;
-        _receiptDate.text = receiptDateTime;
-        _receiptAmount.text = receiptTotalPrice;
+        _vendor.text = receiptVendorName.replaceAll('\n', ' ');
+        _receiptDate.text = receiptDateTime.replaceAll('\n', ' ');
+        _receiptAmount.text = receiptTotalPrice.replaceAll('\n', '');
 
         if (receiptVendorName.isNotEmpty) {
           // get category

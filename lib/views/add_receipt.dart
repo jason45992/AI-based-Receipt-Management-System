@@ -130,6 +130,7 @@ class _AddReceiptState extends State<AddReceipt> {
                         children: [
                           Flexible(
                               child: DefaultTextField(
+                            readOnly: true,
                             controller: _receiptDate,
                             title: 'Date',
                             onTap: () async {
@@ -163,6 +164,7 @@ class _AddReceiptState extends State<AddReceipt> {
                           const Gap(20),
                           Flexible(
                               child: DefaultTextField(
+                            readOnly: true,
                             controller: _receiptTime,
                             title: 'Time',
                             onTap: () async {

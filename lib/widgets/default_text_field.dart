@@ -20,6 +20,7 @@ class DefaultTextField extends StatelessWidget {
       this.onTap,
       this.textInputAction,
       this.enabled,
+      this.readOnly = false,
       this.label})
       : super(key: key);
 
@@ -37,6 +38,7 @@ class DefaultTextField extends StatelessWidget {
   final GestureTapCallback? onTap;
   final TextInputAction? textInputAction;
   final bool? enabled;
+  final bool readOnly;
   String get _title => title;
   //String? get _label => _label;
   Widget? get _suffixIcon => suffixIcon;
@@ -61,6 +63,7 @@ class DefaultTextField extends StatelessWidget {
               bottom: MediaQuery.of(context).viewInsets.bottom + 15 * 4),
           obscureText: obscure ?? false,
           enabled: enabled,
+          readOnly: readOnly,
           focusNode: focusNode,
           keyboardType: keyboardType,
           cursorColor: Repository.textColor(context),
