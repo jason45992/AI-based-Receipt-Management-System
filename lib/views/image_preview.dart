@@ -34,6 +34,7 @@ class _ImagePreviewState extends State<ImagePreview> {
   User? currentUser;
   String orignalImgPath = '';
   List<bool> isSelectedWarranty = [false, true];
+  bool validDatetime = false;
   GlobalKey<FormState> autoAddFormKey = GlobalKey<FormState>();
   final TextEditingController _vendor = TextEditingController();
   final TextEditingController _receiptDate = TextEditingController();
@@ -113,12 +114,15 @@ class _ImagePreviewState extends State<ImagePreview> {
                                       label: receiptDateTime,
                                       validator: (value) {
                                         if (value!.isEmpty) {
+                                          validDatetime = false;
                                           return 'Value cannot be empty';
                                         } else if (!isValidDate(
                                                 value, 'dd/MM/yyyy HH:mm') ||
                                             !appDate.hasMatch(value)) {
+                                          validDatetime = false;
                                           return 'PLease enter a valid date (dd/MM/yyyy HH:mm)';
                                         }
+                                        validDatetime = true;
                                       },
                                     ),
                                     Row(
@@ -309,7 +313,11 @@ class _ImagePreviewState extends State<ImagePreview> {
                                           print(autoAddFormKey.currentState
                                               ?.validate()
                                               .toString());
-                                          uploadImage();
+                                          if (autoAddFormKey.currentState!
+                                                  .validate() &&
+                                              validDatetime) {
+                                            uploadImage();
+                                          }
                                           //   print(_vendor.text
                                           //       .capitalizeFistWord());
                                           //   print(Timestamp.fromDate(DateFormat(
