@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:sticky_grouped_list/sticky_grouped_list.dart';
 import 'package:tripo/json/category_list.dart';
 import 'package:tripo/repo/repository.dart';
-import 'package:iconly/iconly.dart';
 import 'package:tripo/utils/layouts.dart';
 import 'package:intl/intl.dart';
+import 'package:tripo/utils/styles.dart';
 import 'package:tripo/views/receipt_detail.dart';
 import 'package:tripo/widgets/my_app_bar.dart';
 import 'package:gap/gap.dart';
@@ -24,7 +24,10 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
   List<Map<String, dynamic>> transactions = [];
   List<Map<String, dynamic>> filteredTransactions = [];
   final TextEditingController _searchKey = TextEditingController();
+
   final List<bool> _warranty = [false];
+  final List<bool> _filterController = List.filled(categoryItems.length, false);
+  int selectedCategory = -1;
 
   var controller = ScrollController();
   var currentPage = 0;
@@ -84,82 +87,93 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
             ],
           ),
           Container(
-            margin: const EdgeInsets.fromLTRB(0, 60, 0, 0),
-            // padding: const EdgeInsets.only(left: 30),
-            height: 30,
-            child: ListView.builder(
+            margin: const EdgeInsets.fromLTRB(0, 50, 0, 0),
+            child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                itemCount: categoryItems.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return index == 0
-                      ? Container(
-                          margin: const EdgeInsets.fromLTRB(30, 0, 10, 0),
-                          child: ToggleButtons(
-                            borderRadius: BorderRadius.circular(50),
-                            children: <Widget>[
-                              Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        getIcon(categoryItems[index]),
-                                        size: 15,
+                child: Row(
+                  children: [
+                    Container(
+                        height: 30,
+                        padding: const EdgeInsets.only(left: 30),
+                        margin: const EdgeInsets.only(right: 10),
+                        child: ToggleButtons(
+                          borderRadius: BorderRadius.circular(50),
+                          children: <Widget>[
+                            Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      getIcon(categoryItemsWithWarranty[0]),
+                                      size: 15,
+                                    ),
+                                    const Gap(2),
+                                    Text(
+                                      categoryItemsWithWarranty[0],
+                                      style: const TextStyle(
+                                        fontSize: 15,
                                       ),
-                                      const Gap(2),
-                                      Text(
-                                        categoryItems[index],
-                                        style: const TextStyle(fontSize: 15),
-                                      ),
-                                    ],
-                                  ))
-                            ],
-                            isSelected: _warranty,
-                            onPressed: (int index) {
-                              setState(() {
-                                _warranty[index] = !_warranty[index];
-                              });
-                            },
-                            borderColor: getIconColor(categoryItems[index]),
-                            color: getIconColor(categoryItems[index]),
-                            selectedColor: Repository.bgColor(context),
-                            fillColor: Repository.selectedItemColor(context),
-                          ))
-                      : Container(
-                          margin: const EdgeInsets.only(right: 10),
-                          child: ToggleButtons(
-                            borderRadius: BorderRadius.circular(50),
-                            children: <Widget>[
-                              Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        getIcon(categoryItems[index]),
-                                        size: 15,
-                                      ),
-                                      const Gap(2),
-                                      Text(
-                                        categoryItems[index],
-                                        style: const TextStyle(fontSize: 15),
-                                      ),
-                                    ],
-                                  ))
-                            ],
-                            isSelected: _warranty,
-                            onPressed: (int index) {
-                              setState(() {
-                                _warranty[index] = !_warranty[index];
-                              });
-                            },
-                            borderColor: getIconColor(categoryItems[index]),
-                            color: getIconColor(categoryItems[index]),
-                            selectedColor: Repository.bgColor(context),
-                            fillColor: Repository.selectedItemColor(context),
-                          ));
-                }),
+                                    ),
+                                  ],
+                                ))
+                          ],
+                          isSelected: _warranty,
+                          onPressed: (int index) {
+                            setState(() {
+                              _warranty[index] = !_warranty[index];
+                            });
+                          },
+                          borderColor:
+                              getIconColor(categoryItemsWithWarranty[0]),
+                          color: getIconColor(categoryItemsWithWarranty[0]),
+                          selectedColor: Repository.bgColor(context),
+                          fillColor: Repository.titleColor(context),
+                          highlightColor: Colors.transparent,
+                          splashColor: Colors.transparent,
+                        )),
+                    Container(
+                        margin: const EdgeInsets.only(right: 10),
+                        child: ToggleButtons(
+                          renderBorder: false,
+                          children: getFilter(),
+                          isSelected: _filterController,
+                          onPressed: (int index) {
+                            print(index);
+                            setState(() {
+                              //same selection
+                              if (index == selectedCategory) {
+                                for (int i = 0;
+                                    i < _filterController.length;
+                                    i++) {
+                                  _filterController[i] = false;
+                                  selectedCategory = -1;
+                                }
+                              } else {
+                                //different selection
+                                for (int i = 0;
+                                    i < _filterController.length;
+                                    i++) {
+                                  _filterController[i] = i == index;
+                                  selectedCategory = index;
+                                }
+                              }
+                            });
+                          },
+                          highlightColor: Colors.transparent,
+                          splashColor: Colors.transparent,
+                          fillColor: Colors.transparent,
+                        )),
+                  ],
+                )),
           ),
+
+          // Container(
+          //   margin: const EdgeInsets.fromLTRB(0, 60, 0, 0),
+          //   // padding: const EdgeInsets.only(left: 30),
+          //   height: 30,
+          //   child: ,
+          // ),
           Padding(
             padding: const EdgeInsets.fromLTRB(15, 100, 15, 0),
             child: StickyGroupedListView<Map<String, dynamic>, DateTime>(
@@ -284,5 +298,50 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
         );
     filteredTransactions = transactions;
     setState(() {});
+  }
+
+  List<Widget> getFilter() {
+    List<Widget> filters = [];
+    for (var item in categoryItems) {
+      filters.add(
+        Container(
+            // color: Colors.grey,
+            decoration: BoxDecoration(
+              color: _filterController[categoryItems.indexOf(item)]
+                  ? Styles.greenColor
+                  : Styles.whiteColor,
+              border: Border.all(
+                  color: _filterController[categoryItems.indexOf(item)]
+                      ? Repository.textColor(context)
+                      : getIconColor(item)),
+              borderRadius: BorderRadius.circular(50),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            margin: const EdgeInsets.only(right: 10),
+            height: 30,
+            alignment: Alignment.center,
+            child: Row(
+              children: [
+                Icon(
+                  getIcon(item),
+                  size: 15,
+                  color: _filterController[categoryItems.indexOf(item)]
+                      ? Styles.whiteColor
+                      : getIconColor(item),
+                ),
+                const Gap(2),
+                Text(
+                  item,
+                  style: TextStyle(
+                      fontSize: 15,
+                      color: _filterController[categoryItems.indexOf(item)]
+                          ? Styles.whiteColor
+                          : getIconColor(item)),
+                ),
+              ],
+            )),
+      );
+    }
+    return filters;
   }
 }

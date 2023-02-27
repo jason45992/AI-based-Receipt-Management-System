@@ -1,6 +1,7 @@
 //items not in list counted as 'others'
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:iconly/iconly.dart';
 
 List<List<String>> categoryList = [
   ['food', 'meal', 'bakery', 'bar', 'cafe', 'restaurant'],
@@ -38,8 +39,22 @@ final List<String> categoryItems = [
   'Others'
 ];
 
+final List<String> categoryItemsWithWarranty = [
+  'Warranty',
+  'Food',
+  'Beauty',
+  'Supermarket',
+  'Shopping',
+  'Entertainment',
+  'Health',
+  'Transport',
+  'Others'
+];
+
 IconData getIcon(String category) {
   switch (category) {
+    case 'Warranty':
+      return IconlyBold.paper;
     case 'Food':
       return Icons.fastfood;
     case 'Beauty':
@@ -60,6 +75,8 @@ IconData getIcon(String category) {
 
 Color getIconColor(String category) {
   switch (category) {
+    case 'Warranty':
+      return const Color.fromARGB(255, 95, 92, 89);
     case 'Food':
       return const Color.fromARGB(255, 190, 136, 70);
     case 'Beauty':

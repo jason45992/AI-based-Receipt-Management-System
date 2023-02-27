@@ -123,6 +123,7 @@ class _ImagePreviewState extends State<ImagePreview> {
                                           return 'PLease enter a valid date (dd/MM/yyyy HH:mm)';
                                         }
                                         validDatetime = true;
+                                        return null;
                                       },
                                     ),
                                     Row(
@@ -300,6 +301,7 @@ class _ImagePreviewState extends State<ImagePreview> {
                                         } else if (!amount.hasMatch(value)) {
                                           return 'PLease enter amount with 2 decimal place';
                                         }
+                                        return null;
                                       },
                                     ),
                                     const Gap(10),
