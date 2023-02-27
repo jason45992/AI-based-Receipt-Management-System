@@ -1,16 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sticky_grouped_list/sticky_grouped_list.dart';
 import 'package:tripo/json/category_list.dart';
 import 'package:tripo/repo/repository.dart';
 import 'package:iconly/iconly.dart';
-import 'package:tripo/utils/input_decoration.dart';
 import 'package:tripo/utils/layouts.dart';
 import 'package:intl/intl.dart';
 import 'package:tripo/views/receipt_detail.dart';
-import 'package:tripo/widgets/default_text_field.dart';
 import 'package:tripo/widgets/my_app_bar.dart';
 import 'package:gap/gap.dart';
 
@@ -25,8 +22,12 @@ class ReceiptManagement extends StatefulWidget {
 class _ReceiptManagementState extends State<ReceiptManagement> {
   late User _currentUser;
   List<Map<String, dynamic>> transactions = [];
-  List<Map<String, dynamic>> filtered_transactions = [];
+  List<Map<String, dynamic>> filteredTransactions = [];
   final TextEditingController _searchKey = TextEditingController();
+  final List<bool> _warranty = [false];
+
+  var controller = ScrollController();
+  var currentPage = 0;
 
   @override
   void initState() {
@@ -43,48 +44,126 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
         appBar:
             myAppBar(title: 'Receipts', implyLeading: false, context: context),
         body: Stack(children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                  padding: const EdgeInsets.fromLTRB(20, 5, 10, 5),
+                  alignment: Alignment.center,
+                  width: size.width * 0.85,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(50),
+                    color: Repository.accentColor(context),
+                  ),
+                  child: TextField(
+                    style: TextStyle(color: Repository.textColor(context)),
+                    controller: _searchKey,
+                    cursorColor: Repository.textColor(context),
+                    decoration: InputDecoration(
+                        hintStyle:
+                            TextStyle(color: Repository.textColor(context)),
+                        border: InputBorder.none,
+                        hintText: 'Search receipts'),
+                    onChanged: (value) {
+                      if (value.isNotEmpty) {
+                        setState(() {
+                          filteredTransactions = transactions
+                              .where((i) => i['vendor_name']
+                                  .toLowerCase()
+                                  .contains(value.toLowerCase()))
+                              .toList();
+                        });
+                      } else {
+                        setState(() {
+                          filteredTransactions = transactions;
+                        });
+                      }
+                    },
+                  )),
+            ],
+          ),
+          Container(
+            margin: const EdgeInsets.fromLTRB(0, 60, 0, 0),
+            // padding: const EdgeInsets.only(left: 30),
+            height: 30,
+            child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: categoryItems.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return index == 0
+                      ? Container(
+                          margin: const EdgeInsets.fromLTRB(30, 0, 10, 0),
+                          child: ToggleButtons(
+                            borderRadius: BorderRadius.circular(50),
+                            children: <Widget>[
+                              Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        getIcon(categoryItems[index]),
+                                        size: 15,
+                                      ),
+                                      const Gap(2),
+                                      Text(
+                                        categoryItems[index],
+                                        style: const TextStyle(fontSize: 15),
+                                      ),
+                                    ],
+                                  ))
+                            ],
+                            isSelected: _warranty,
+                            onPressed: (int index) {
+                              setState(() {
+                                _warranty[index] = !_warranty[index];
+                              });
+                            },
+                            borderColor: getIconColor(categoryItems[index]),
+                            color: getIconColor(categoryItems[index]),
+                            selectedColor: Repository.bgColor(context),
+                            fillColor: Repository.selectedItemColor(context),
+                          ))
+                      : Container(
+                          margin: const EdgeInsets.only(right: 10),
+                          child: ToggleButtons(
+                            borderRadius: BorderRadius.circular(50),
+                            children: <Widget>[
+                              Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        getIcon(categoryItems[index]),
+                                        size: 15,
+                                      ),
+                                      const Gap(2),
+                                      Text(
+                                        categoryItems[index],
+                                        style: const TextStyle(fontSize: 15),
+                                      ),
+                                    ],
+                                  ))
+                            ],
+                            isSelected: _warranty,
+                            onPressed: (int index) {
+                              setState(() {
+                                _warranty[index] = !_warranty[index];
+                              });
+                            },
+                            borderColor: getIconColor(categoryItems[index]),
+                            color: getIconColor(categoryItems[index]),
+                            selectedColor: Repository.bgColor(context),
+                            fillColor: Repository.selectedItemColor(context),
+                          ));
+                }),
+          ),
           Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                      padding: const EdgeInsets.fromLTRB(20, 5, 10, 5),
-                      alignment: Alignment.center,
-                      width: size.width * 0.85,
-                      height: 50,
-                      // padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(50),
-                        color: Repository.accentColor(context),
-                      ),
-                      child: TextField(
-                        controller: _searchKey,
-                        decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'Search receipts'),
-                        onChanged: (value) {
-                          if (value.isNotEmpty) {
-                            setState(() {
-                              filtered_transactions = transactions
-                                  .where((i) => i['vendor_name']
-                                      .toLowerCase()
-                                      .contains(value.toLowerCase()))
-                                  .toList();
-                            });
-                          } else {
-                            setState(() {
-                              filtered_transactions = transactions;
-                            });
-                          }
-                        },
-                      )),
-                ],
-              )),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(15, 60, 15, 0),
+            padding: const EdgeInsets.fromLTRB(15, 100, 15, 0),
             child: StickyGroupedListView<Map<String, dynamic>, DateTime>(
-              elements: filtered_transactions,
+              elements: filteredTransactions,
               order: StickyGroupedListOrder.DESC,
               groupBy: (Map<String, dynamic> element) =>
                   DateFormat('dd/MM/yyyy')
@@ -185,7 +264,7 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
   Future<void> getTransactions() async {
     final db = FirebaseFirestore.instance;
     transactions = [];
-    filtered_transactions = [];
+    filteredTransactions = [];
     await db
         .collection('receipts')
         .where('user_email', isEqualTo: _currentUser.email)
@@ -203,7 +282,7 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
           }),
           onError: (e) => print('Error completing: $e'),
         );
-    filtered_transactions = transactions;
+    filteredTransactions = transactions;
     setState(() {});
   }
 }
