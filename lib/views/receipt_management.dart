@@ -27,7 +27,7 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
 
   final List<bool> _warranty = [false];
   final List<bool> _filterController = List.filled(categoryItems.length, false);
-  int selectedCategory = -1;
+  int selectedCategoryIndex = -1;
 
   var controller = ScrollController();
   var currentPage = 0;
@@ -69,19 +69,9 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
                         border: InputBorder.none,
                         hintText: 'Search receipts'),
                     onChanged: (value) {
-                      if (value.isNotEmpty) {
-                        setState(() {
-                          filteredTransactions = transactions
-                              .where((i) => i['vendor_name']
-                                  .toLowerCase()
-                                  .contains(value.toLowerCase()))
-                              .toList();
-                        });
-                      } else {
-                        setState(() {
-                          filteredTransactions = transactions;
-                        });
-                      }
+                      setState(() {
+                        filterContent();
+                      });
                     },
                   )),
             ],
@@ -122,6 +112,7 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
                           onPressed: (int index) {
                             setState(() {
                               _warranty[index] = !_warranty[index];
+                              filterContent();
                             });
                           },
                           borderColor:
@@ -139,25 +130,26 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
                           children: getFilter(),
                           isSelected: _filterController,
                           onPressed: (int index) {
-                            print(index);
                             setState(() {
                               //same selection
-                              if (index == selectedCategory) {
+                              if (index == selectedCategoryIndex) {
                                 for (int i = 0;
                                     i < _filterController.length;
                                     i++) {
                                   _filterController[i] = false;
-                                  selectedCategory = -1;
                                 }
+                                selectedCategoryIndex = -1;
                               } else {
                                 //different selection
                                 for (int i = 0;
                                     i < _filterController.length;
                                     i++) {
                                   _filterController[i] = i == index;
-                                  selectedCategory = index;
                                 }
+                                selectedCategoryIndex = index;
                               }
+
+                              filterContent();
                             });
                           },
                           highlightColor: Colors.transparent,
@@ -343,5 +335,29 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
       );
     }
     return filters;
+  }
+
+  void filterContent() {
+    filteredTransactions = transactions;
+
+    if (_warranty[0]) {
+      filteredTransactions = filteredTransactions
+          .where((i) => i['with_warranty'] == true)
+          .toList();
+    }
+
+    if (selectedCategoryIndex != -1) {
+      filteredTransactions = filteredTransactions
+          .where((i) => i['category'] == categoryItems[selectedCategoryIndex])
+          .toList();
+    }
+
+    if (_searchKey.text.isNotEmpty) {
+      filteredTransactions = filteredTransactions
+          .where((i) => i['vendor_name']
+              .toLowerCase()
+              .contains(_searchKey.text.toLowerCase()))
+          .toList();
+    }
   }
 }
