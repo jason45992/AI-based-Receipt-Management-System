@@ -32,7 +32,7 @@ class _HomeState extends State<Home> {
   late User _currentUser;
   List<Map<String, dynamic>> transactions = [];
   List<String> filterOptions = ['Latest', 'Today', 'Week', 'Month'];
-  String currentFilterOption = 'Latest';
+  String currentFilterOption = 'Week';
   int touchedIndex = -1;
 
   @override
