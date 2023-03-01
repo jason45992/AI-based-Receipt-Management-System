@@ -40,7 +40,7 @@ class _StatsState extends State<Stats> {
     return Scaffold(
       backgroundColor: Repository.bgColor(context),
       appBar: myAppBar(
-          title: 'Stats',
+          title: 'Summary',
           implyLeading: false,
           context: context,
           hasAction: true),
