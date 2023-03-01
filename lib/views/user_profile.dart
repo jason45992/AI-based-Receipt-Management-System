@@ -255,6 +255,7 @@ class _UserProfileState extends State<UserProfile> {
                         width: 275,
                         height: 30,
                         child: TextFormField(
+                          readOnly: true,
                           cursorColor: Repository.textColor(context),
                           controller: _email,
                           style: TextStyle(
