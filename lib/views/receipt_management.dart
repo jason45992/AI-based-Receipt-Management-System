@@ -24,6 +24,8 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
   List<Map<String, dynamic>> transactions = [];
   List<Map<String, dynamic>> filteredTransactions = [];
   final TextEditingController _searchKey = TextEditingController();
+  final GroupedItemScrollController itemScrollController =
+      GroupedItemScrollController();
 
   final List<bool> _warranty = [false];
   final List<bool> _filterController = List.filled(categoryItems.length, false);
@@ -169,6 +171,7 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
           Padding(
             padding: const EdgeInsets.fromLTRB(15, 100, 15, 0),
             child: StickyGroupedListView<Map<String, dynamic>, DateTime>(
+              itemScrollController: itemScrollController,
               elements: filteredTransactions,
               order: StickyGroupedListOrder.DESC,
               groupBy: (Map<String, dynamic> element) =>
@@ -339,7 +342,6 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
 
   void filterContent() {
     filteredTransactions = transactions;
-
     if (_warranty[0]) {
       filteredTransactions = filteredTransactions
           .where((i) => i['with_warranty'] == true)
@@ -358,6 +360,10 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
               .toLowerCase()
               .contains(_searchKey.text.toLowerCase()))
           .toList();
+    }
+
+    if (filteredTransactions.isNotEmpty) {
+      itemScrollController.jumpTo(index: 0);
     }
   }
 }
