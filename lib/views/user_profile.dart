@@ -173,10 +173,11 @@ class _UserProfileState extends State<UserProfile> {
                   child: Icon(
                     IconlyBroken.profile,
                     size: 25,
-                    color: Styles.primaryColor,
+                    color: Repository.textColor(context),
                   ),
                 ),
-                const VerticalDivider(
+                VerticalDivider(
+                  color: Styles.greyColor,
                   indent: 10,
                   endIndent: 10,
                   thickness: 2,
@@ -187,16 +188,24 @@ class _UserProfileState extends State<UserProfile> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Username'),
+                      Text(
+                        'Username',
+                        style: TextStyle(color: Repository.textColor(context)),
+                      ),
                       SizedBox(
                         width: 275,
                         height: 30,
                         child: TextFormField(
-                          cursorColor: Styles.primaryColor,
+                          cursorColor: Repository.textColor(context),
                           controller: _name,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Repository.textColor(context)),
                           decoration: InputDecoration(
                             hintText: _currentUser.displayName,
+                            hintStyle: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Repository.textColor(context)),
                             border: InputBorder.none,
                           ),
                         ),
@@ -223,10 +232,11 @@ class _UserProfileState extends State<UserProfile> {
                   child: Icon(
                     IconlyBroken.message,
                     size: 25,
-                    color: Styles.primaryColor,
+                    color: Repository.textColor(context),
                   ),
                 ),
-                const VerticalDivider(
+                VerticalDivider(
+                  color: Styles.greyColor,
                   indent: 10,
                   endIndent: 10,
                   thickness: 2,
@@ -237,16 +247,24 @@ class _UserProfileState extends State<UserProfile> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Email'),
+                      Text(
+                        'Email',
+                        style: TextStyle(color: Repository.textColor(context)),
+                      ),
                       SizedBox(
                         width: 275,
                         height: 30,
                         child: TextFormField(
-                          cursorColor: Styles.primaryColor,
+                          cursorColor: Repository.textColor(context),
                           controller: _email,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Repository.textColor(context)),
                           decoration: InputDecoration(
                             hintText: _currentUser.email,
+                            hintStyle: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Repository.textColor(context)),
                             border: InputBorder.none,
                           ),
                         ),
@@ -273,10 +291,11 @@ class _UserProfileState extends State<UserProfile> {
                   child: Icon(
                     IconlyBroken.call,
                     size: 25,
-                    color: Styles.primaryColor,
+                    color: Repository.textColor(context),
                   ),
                 ),
-                const VerticalDivider(
+                VerticalDivider(
+                  color: Styles.greyColor,
                   indent: 10,
                   endIndent: 10,
                   thickness: 2,
@@ -287,16 +306,24 @@ class _UserProfileState extends State<UserProfile> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Mobile Number'),
+                      Text(
+                        'Mobile Number',
+                        style: TextStyle(color: Repository.textColor(context)),
+                      ),
                       SizedBox(
                         width: 275,
                         height: 30,
                         child: TextFormField(
-                          cursorColor: Styles.primaryColor,
+                          cursorColor: Repository.textColor(context),
                           controller: _phone,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Repository.textColor(context)),
                           decoration: InputDecoration(
                             hintText: _currentUser.phoneNumber,
+                            hintStyle: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Repository.textColor(context)),
                             border: InputBorder.none,
                           ),
                         ),

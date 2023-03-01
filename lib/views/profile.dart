@@ -136,16 +136,11 @@ class _ProfileState extends State<Profile> {
           CustomListTile(
               icon: IconlyBold.shield_done,
               color: const Color(0xFF229e76),
-              title: 'Security',
+              title: 'Contact us',
               context: context),
           CustomListTile(
               icon: IconlyBold.message,
               color: const Color(0xFFe17a0a),
-              title: 'Contact us',
-              context: context),
-          CustomListTile(
-              icon: IconlyBold.document,
-              color: const Color(0xFF064c6d),
               title: 'Support',
               context: context),
           CustomListTile(
