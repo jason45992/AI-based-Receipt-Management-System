@@ -15,6 +15,7 @@ class Assets {
   static const String fontsIconlyBold = 'assets/fonts/Iconly_Bold.ttf';
   static const String fontsIconlyLight = 'assets/fonts/Iconly_Light.ttf';
   static const String jw = 'assets/memoji/jw.png';
+  static const String defaultUserProfileImg = 'assets/memoji/default_user.png';
   static const String memoji1 = 'assets/memoji/1.png';
   static const String memoji2 = 'assets/memoji/2.png';
   static const String memoji3 = 'assets/memoji/3.png';
