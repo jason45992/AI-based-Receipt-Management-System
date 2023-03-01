@@ -4,6 +4,7 @@ import 'package:tripo/auth/login_page.dart';
 import 'package:tripo/generated/assets.dart';
 import 'package:tripo/json/shortcut_list.dart';
 import 'package:tripo/repo/repository.dart';
+import 'package:tripo/views/user_profile.dart';
 import 'package:tripo/widgets/custom_list_tile.dart';
 import 'package:iconly/iconly.dart';
 import 'package:tripo/utils/styles.dart';
@@ -97,21 +98,27 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
               Positioned(
-                left: 30,
-                right: 30,
-                child: Container(
-                  height: 100,
-                  width: 100,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Styles.greenColor,
-                  ),
-                  child: Transform.scale(
-                    scale: 0.8,
-                    child: Image.asset(Assets.jw),
-                  ),
-                ),
-              )
+                  left: 30,
+                  right: 30,
+                  child: Container(
+                    // margin: const EdgeInsets.fromLTRB(5, 5, 5, 5),
+                    height: 100,
+                    width: 100,
+                    // color: Colors.amber,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Styles.greenColor,
+                    ),
+                    child: CircleAvatar(
+                      backgroundColor: Styles.greenColor,
+                      radius: 50,
+                      child: ClipOval(
+                        child: _currentUser.photoURL != null
+                            ? Image.asset(Assets.jw)
+                            : Image.asset(Assets.defaultUserProfileImg),
+                      ),
+                    ),
+                  )),
             ],
           ),
           const Gap(35),
@@ -119,7 +126,13 @@ class _ProfileState extends State<Profile> {
               icon: IconlyBold.profile,
               color: const Color(0xFFFF736C),
               title: 'Information',
-              context: context),
+              context: context,
+              callback: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => UserProfile(user: _currentUser)));
+              }),
           CustomListTile(
               icon: IconlyBold.shield_done,
               color: const Color(0xFF229e76),
