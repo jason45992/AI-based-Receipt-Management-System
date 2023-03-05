@@ -21,8 +21,7 @@ import 'package:collection/collection.dart';
 import 'package:tripo/widgets/not_found.dart';
 
 class Home extends StatefulWidget {
-  final User user;
-  const Home({required this.user});
+  const Home({Key? key}) : super(key: key);
 
   @override
   _HomeState createState() => _HomeState();
@@ -37,7 +36,7 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    _currentUser = widget.user;
+    _currentUser = FirebaseAuth.instance.currentUser!;
     getTransactions();
     super.initState();
   }
@@ -506,7 +505,7 @@ class _HomeState extends State<Home> {
         double percent =
             ((totalCategoryAmount / totalAllAmount)).toPrecision(3);
         final isTouched = index == touchedIndex;
-        final fontSize = isTouched ? 22.0 : 14.0;
+        final fontSize = isTouched ? 16.0 : 12.0;
         final radius = isTouched ? 60.0 : 50.0;
         const shadows = [Shadow(color: Colors.black, blurRadius: 1)];
         result.add(PieChartSectionData(

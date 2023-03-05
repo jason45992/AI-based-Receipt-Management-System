@@ -34,10 +34,10 @@ class _BottomNavState extends State<BottomNav> {
   Widget build(BuildContext context) {
     if (user != null) {
       _widgetOptions = <Widget>[
-        Home(user: user!),
+        const Home(),
         ReceiptManagement(user: user!),
         Stats(user: user!),
-        Profile(user: user!),
+        const Profile(),
       ];
     }
 

@@ -124,6 +124,7 @@ class _AddReceiptState extends State<AddReceipt> {
                           } else if (!amount.hasMatch(value)) {
                             return 'PLease enter amount with 2 decimal place';
                           }
+                          return null;
                         },
                       ),
                       Row(

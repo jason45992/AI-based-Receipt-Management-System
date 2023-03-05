@@ -22,7 +22,7 @@ class Stats extends StatefulWidget {
 }
 
 class _StatsState extends State<Stats> {
-  String _currentRange = 'Today';
+  String _currentRange = 'Week';
   bool positive = false;
   late User _currentUser;
   List<Map<String, dynamic>> transactions = [];
