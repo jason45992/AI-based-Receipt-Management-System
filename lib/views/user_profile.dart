@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tripo/generated/assets.dart';
 import 'package:tripo/repo/repository.dart';
+import 'package:tripo/utils/size_config.dart';
 import 'package:tripo/widgets/buttons.dart';
 import 'package:iconly/iconly.dart';
 import 'package:tripo/utils/styles.dart';
@@ -99,8 +100,11 @@ class _UserProfileState extends State<UserProfile> {
                                 color: Colors.grey,
                                 strokeWidth: 3,
                                 child: Container(
-                                  margin:
-                                      const EdgeInsets.fromLTRB(93, 5, 5, 5),
+                                  margin: EdgeInsets.fromLTRB(
+                                      MediaQuery.of(context).size.width * 0.24,
+                                      5,
+                                      5,
+                                      5),
                                   height: 100,
                                   width: 100,
                                   // color: Colors.amber,

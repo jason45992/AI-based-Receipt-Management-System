@@ -75,6 +75,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: Column(
                         children: [
                           TextFormField(
+                            enableSuggestions: false,
                             controller: _emailTextController,
                             focusNode: _focusEmail,
                             validator: (value) => Validator.validateEmail(
