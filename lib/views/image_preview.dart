@@ -336,8 +336,10 @@ class _ImagePreviewState extends State<ImagePreview> {
                           ],
                         ));
                   }
-                  return const Center(
-                    child: CircularProgressIndicator(),
+                  return Center(
+                    child: CircularProgressIndicator(
+                      color: Styles.primaryColor,
+                    ),
                   );
                 })));
   }

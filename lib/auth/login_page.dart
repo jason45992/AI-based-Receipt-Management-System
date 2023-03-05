@@ -129,7 +129,9 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                           _isProcessing
-                              ? const CircularProgressIndicator()
+                              ? CircularProgressIndicator(
+                                  color: Styles.primaryColor,
+                                )
                               : Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
