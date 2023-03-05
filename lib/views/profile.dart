@@ -13,9 +13,7 @@ import 'package:tripo/widgets/my_app_bar.dart';
 import 'package:gap/gap.dart';
 
 class Profile extends StatefulWidget {
-  final User user;
-
-  const Profile({required this.user});
+  const Profile({Key? key}) : super(key: key);
 
   @override
   _ProfileState createState() => _ProfileState();
@@ -28,7 +26,7 @@ class _ProfileState extends State<Profile> {
 
   @override
   void initState() {
-    _currentUser = widget.user;
+    _currentUser = FirebaseAuth.instance.currentUser!;
     getUserData();
     super.initState();
   }
@@ -129,26 +127,33 @@ class _ProfileState extends State<Profile> {
           CustomListTile(
               icon: IconlyBold.profile,
               color: const Color(0xFFFF736C),
-              title: 'Information',
+              title: 'Account',
               context: context,
               callback: () {
                 Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>
-                                UserProfile(user: _currentUser)))
-                    .then((value) => getUserData());
+                            builder: (context) => const UserProfile()))
+                    .then((value) {
+                  getUserData();
+                  _currentUser = FirebaseAuth.instance.currentUser!;
+                });
               }),
           CustomListTile(
-              icon: IconlyBold.shield_done,
-              color: const Color(0xFF229e76),
-              title: 'Contact us',
-              context: context),
-          CustomListTile(
               icon: IconlyBold.message,
-              color: const Color(0xFFe17a0a),
+              color: const Color(0xFF229e76),
               title: 'Support',
               context: context),
+          CustomListTile(
+              icon: IconlyBold.setting,
+              color: const Color(0xFFe17a0a),
+              title: 'Settings',
+              context: context),
+          // CustomListTile(
+          //     icon: Icons.dark_mode,
+          //     color: const Color(0xFF474747),
+          //     title: 'Logout',
+          //     context: context),
           CustomListTile(
               icon: Icons.dark_mode,
               color: const Color(0xFF474747),

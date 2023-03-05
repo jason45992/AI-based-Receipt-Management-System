@@ -2,11 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:document_scanner_flutter/configs/configs.dart';
-import 'package:document_scanner_flutter/document_scanner_flutter.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tripo/generated/assets.dart';
@@ -19,9 +18,7 @@ import 'package:gap/gap.dart';
 import 'package:image_cropper/image_cropper.dart';
 
 class UserProfile extends StatefulWidget {
-  final User user;
-
-  const UserProfile({required this.user});
+  const UserProfile({Key? key}) : super(key: key);
 
   @override
   _UserProfileState createState() => _UserProfileState();
@@ -29,14 +26,20 @@ class UserProfile extends StatefulWidget {
 
 class _UserProfileState extends State<UserProfile> {
   late User _currentUser;
+  GlobalKey<FormState> updateFormKey = GlobalKey<FormState>();
   final TextEditingController _name = TextEditingController();
   final TextEditingController _email = TextEditingController();
+  final TextEditingController _pwd = TextEditingController();
+  final TextEditingController _pwd2 = TextEditingController();
   String documentId = '';
   String profileImgUrl = '';
+  bool _isProcessing = false;
 
   @override
   void initState() {
-    _currentUser = widget.user;
+    _currentUser = FirebaseAuth.instance.currentUser!;
+    _name.text = _currentUser.displayName!;
+    _email.text = _currentUser.email!;
     getUserData();
     super.initState();
   }
@@ -44,277 +47,431 @@ class _UserProfileState extends State<UserProfile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Repository.bgColor(context),
-      appBar:
-          myAppBar(title: 'Edit Profile', implyLeading: true, context: context),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          // const Gap(40),
-          Stack(
-            children: [
-              Container(
-                height: 240,
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  height: 200,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    // color: Repository.accentColor(context),
-                  ),
+        backgroundColor: Repository.bgColor(context),
+        appBar: myAppBar(
+            title: 'Edit Profile', implyLeading: true, context: context),
+        body: _isProcessing
+            ? Center(
+                child: CircularProgressIndicator(
+                color: Styles.primaryColor,
+              ))
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Form(
+                  key: updateFormKey,
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    // padding: const EdgeInsets.all(20),
                     children: [
-                      const Gap(50),
-                      Center(
-                          child: Text('${_currentUser.displayName}',
-                              style: TextStyle(
-                                  color: Repository.textColor(context),
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold))),
-                      const Gap(10),
-                      Text('${_currentUser.email}',
-                          style: TextStyle(
-                              color: Repository.subTextColor(context))),
-                    ],
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 30,
-                right: 30,
-                child: DottedBorder(
-                    borderType: BorderType.Circle,
-                    dashPattern: const [20, 5],
-                    color: Colors.grey,
-                    strokeWidth: 3,
-                    child: Container(
-                      margin: const EdgeInsets.fromLTRB(93, 5, 5, 5),
-                      height: 100,
-                      width: 100,
-                      // color: Colors.amber,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Styles.greenColor,
+                      // const Gap(40),
+                      Stack(
+                        children: [
+                          Container(
+                            height: 250,
+                            alignment: Alignment.bottomCenter,
+                            child: Container(
+                              height: 180,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                // color: Repository.accentColor(context),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const Gap(50),
+                                  Text(
+                                      'Joined ${DateTime.now().difference(_currentUser.metadata.creationTime!).inDays} days',
+                                      style: TextStyle(
+                                          color:
+                                              Repository.subTextColor(context),
+                                          fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: 30,
+                            left: 30,
+                            right: 30,
+                            child: DottedBorder(
+                                borderType: BorderType.Circle,
+                                dashPattern: const [20, 5],
+                                color: Colors.grey,
+                                strokeWidth: 3,
+                                child: Container(
+                                  margin:
+                                      const EdgeInsets.fromLTRB(93, 5, 5, 5),
+                                  height: 100,
+                                  width: 100,
+                                  // color: Colors.amber,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Styles.greenColor,
+                                  ),
+                                  child: CircleAvatar(
+                                    backgroundColor: Styles.greenColor,
+                                    radius: 50,
+                                    backgroundImage: profileImgUrl != ''
+                                        ? Image.network(profileImgUrl).image
+                                        : const AssetImage(
+                                            Assets.defaultUserProfileImg),
+                                  ),
+                                )),
+                          ),
+                          Positioned(
+                              top: 105,
+                              left: 100,
+                              right: 30,
+                              child: InkWell(
+                                  child: Container(
+                                    height: 35,
+                                    width: 35,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Styles.primaryColor,
+                                      border: Border.all(
+                                          color: Styles.whiteColor, width: 2),
+                                    ),
+                                    child: Icon(
+                                      IconlyBold.edit,
+                                      color: Styles.greyColor,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  highlightColor: Colors.transparent,
+                                  splashColor: Colors.transparent,
+                                  onTap: () async {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      builder: (context) {
+                                        return Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: <Widget>[
+                                            ListTile(
+                                              leading: const Icon(Icons.upload),
+                                              title: const Text(
+                                                  'Upload New Profile Photo'),
+                                              onTap: () {
+                                                Navigator.pop(context);
+                                                uploadNewProfileImage();
+                                                setState(() {});
+                                              },
+                                            ),
+                                            ListTile(
+                                              leading: const Icon(Icons.delete),
+                                              title: const Text(
+                                                  'Rmove Profile Photo'),
+                                              onTap: () {
+                                                Navigator.pop(context);
+                                                deleteProfileImg();
+                                                setState(() {});
+                                                //set to default photo
+                                              },
+                                            ),
+                                            ListTile(
+                                              onTap: () {
+                                                Navigator.pop(context);
+                                              },
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  }))
+                        ],
                       ),
-                      child: CircleAvatar(
-                        backgroundColor: Styles.greenColor,
-                        radius: 50,
-                        backgroundImage: profileImgUrl != ''
-                            ? Image.network(profileImgUrl).image
-                            : const AssetImage(Assets.defaultUserProfileImg),
-                      ),
-                    )),
-              ),
-              Positioned(
-                  top: 75,
-                  left: 100,
-                  right: 30,
-                  child: InkWell(
-                      child: Container(
-                        height: 35,
-                        width: 35,
+
+                      Container(
+                        height: 70,
                         decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Styles.primaryColor,
-                          border:
-                              Border.all(color: Styles.whiteColor, width: 2),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Styles.greyColor, width: 2),
+                          color: Colors.transparent,
                         ),
-                        child: Icon(
-                          IconlyBold.edit,
-                          color: Styles.greyColor,
-                          size: 20,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 10),
+                              child: Icon(
+                                IconlyBroken.profile,
+                                size: 25,
+                                color: Repository.textColor(context),
+                              ),
+                            ),
+                            VerticalDivider(
+                              color: Styles.greyColor,
+                              indent: 10,
+                              endIndent: 10,
+                              thickness: 2,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 5),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Username',
+                                    style: TextStyle(
+                                        color: Repository.textColor(context)),
+                                  ),
+                                  SizedBox(
+                                    width: 275,
+                                    height: 30,
+                                    child: TextFormField(
+                                      cursorColor:
+                                          Repository.textColor(context),
+                                      controller: _name,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Repository.textColor(context)),
+                                      decoration: const InputDecoration(
+                                        border: InputBorder.none,
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            )
+                          ],
                         ),
                       ),
-                      highlightColor: Colors.transparent,
-                      splashColor: Colors.transparent,
-                      onTap: () async {
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (context) {
-                            return Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                ListTile(
-                                  leading: new Icon(Icons.upload),
-                                  title: new Text('Upload New Profile Photo'),
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                    uploadNewProfileImage();
-                                    setState(() {});
-                                  },
-                                ),
-                                ListTile(
-                                  leading: new Icon(Icons.delete),
-                                  title: new Text('Rmove Profile Photo'),
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                    deleteProfileImg();
-                                    setState(() {});
-                                    //set to default photo
-                                  },
-                                ),
-                                ListTile(
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      }))
-            ],
-          ),
-          const Gap(20),
-          Container(
-            height: 70,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Styles.greyColor, width: 2),
-              color: Colors.transparent,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: Icon(
-                    IconlyBroken.profile,
-                    size: 25,
-                    color: Repository.textColor(context),
-                  ),
-                ),
-                VerticalDivider(
-                  color: Styles.greyColor,
-                  indent: 10,
-                  endIndent: 10,
-                  thickness: 2,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 5),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Username',
-                        style: TextStyle(color: Repository.textColor(context)),
-                      ),
-                      SizedBox(
-                        width: 275,
-                        height: 30,
-                        child: TextFormField(
-                          cursorColor: Repository.textColor(context),
-                          controller: _name,
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Repository.textColor(context)),
-                          decoration: InputDecoration(
-                            hintText: _currentUser.displayName,
-                            hintStyle: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Repository.textColor(context)),
-                            border: InputBorder.none,
-                          ),
+                      const Gap(20),
+                      Container(
+                        height: 70,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Styles.greyColor, width: 2),
+                          // color: Repository.accentColor(context),
                         ),
-                      )
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 10),
+                              child: Icon(
+                                IconlyBroken.message,
+                                size: 25,
+                                color: Repository.textColor(context),
+                              ),
+                            ),
+                            VerticalDivider(
+                              color: Styles.greyColor,
+                              indent: 10,
+                              endIndent: 10,
+                              thickness: 2,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 5),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Email',
+                                    style: TextStyle(
+                                        color: Repository.textColor(context)),
+                                  ),
+                                  SizedBox(
+                                    width: 275,
+                                    height: 30,
+                                    child: TextFormField(
+                                      readOnly: true,
+                                      cursorColor:
+                                          Repository.textColor(context),
+                                      controller: _email,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Styles.darkGreyColor),
+                                      decoration: const InputDecoration(
+                                        border: InputBorder.none,
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                      const Gap(20),
+                      Container(
+                        height: 70,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Styles.greyColor, width: 2),
+                          // color: Repository.accentColor(context),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 10),
+                              child: Icon(
+                                IconlyBroken.password,
+                                size: 25,
+                                color: Repository.textColor(context),
+                              ),
+                            ),
+                            VerticalDivider(
+                              color: Styles.greyColor,
+                              indent: 10,
+                              endIndent: 10,
+                              thickness: 2,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 5),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Password',
+                                    style: TextStyle(
+                                        color: Repository.textColor(context)),
+                                  ),
+                                  SizedBox(
+                                    width: 275,
+                                    height: 30,
+                                    child: TextFormField(
+                                      keyboardType:
+                                          TextInputType.visiblePassword,
+                                      cursorColor:
+                                          Repository.textColor(context),
+                                      controller: _pwd,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Repository.textColor(context)),
+                                      decoration: const InputDecoration(
+                                        border: InputBorder.none,
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                      const Gap(20),
+                      Container(
+                        height: 70,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Styles.greyColor, width: 2),
+                          // color: Repository.accentColor(context),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 10),
+                              child: Icon(
+                                IconlyBroken.info_circle,
+                                size: 25,
+                                color: Repository.textColor(context),
+                              ),
+                            ),
+                            VerticalDivider(
+                              color: Styles.greyColor,
+                              indent: 10,
+                              endIndent: 10,
+                              thickness: 2,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 5),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Re-enter Password',
+                                    style: TextStyle(
+                                        color: Repository.textColor(context)),
+                                  ),
+                                  SizedBox(
+                                    width: 275,
+                                    height: 30,
+                                    child: TextFormField(
+                                      keyboardType:
+                                          TextInputType.visiblePassword,
+                                      // autovalidateMode:
+                                      //     AutovalidateMode.onUserInteraction,
+                                      // validator: (value) {
+                                      //   print(value);
+                                      //   // if (value!.isEmpty) {
+                                      //   //   return 'Value cannot be empty';
+                                      //   // }
+                                      //   if (value != _pwd.text) {
+                                      //     return 'Password not matching';
+                                      //   }
+                                      //   return null;
+                                      // },
+                                      cursorColor:
+                                          Repository.textColor(context),
+                                      controller: _pwd2,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Repository.textColor(context)),
+                                      decoration: const InputDecoration(
+                                        border: InputBorder.none,
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                      const Gap(40),
+                      _isProcessing
+                          ? const SizedBox()
+                          : elevatedButton(
+                              color: Repository.selectedItemColor(context),
+                              context: context,
+                              text: 'Update',
+                              callback: () async {
+                                bool result = false;
+                                if (_pwd.text.isNotEmpty ||
+                                    _pwd.text.isNotEmpty) {
+                                  if ((_pwd.text == _pwd2.text)) {
+                                    _currentUser.updatePassword(_pwd.text);
+                                    result = true;
+                                  } else {
+                                    Navigator.of(context)
+                                        .restorablePush(_dialogFailBuilder);
+                                    return;
+                                  }
+                                }
+                                if (_name.text != _currentUser.displayName) {
+                                  result = false;
+                                  _currentUser.updateDisplayName(_name.text);
+                                  _currentUser =
+                                      FirebaseAuth.instance.currentUser!;
+                                  final data = <String, dynamic>{
+                                    'name': _name.text
+                                  };
+                                  final db = FirebaseFirestore.instance;
+                                  await db
+                                      .collection('users')
+                                      .doc(documentId)
+                                      .update(data)
+                                      .then((value) => null)
+                                      .onError((error, stackTrace) {
+                                    print('object');
+                                  });
+                                  result = true;
+                                }
+                                if (result) {
+                                  Navigator.of(context)
+                                      .restorablePush(_dialogSuccessBuilder);
+                                }
+                              }),
                     ],
                   ),
-                )
-              ],
-            ),
-          ),
-          const Gap(20),
-          Container(
-            height: 70,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Styles.greyColor, width: 2),
-              // color: Repository.accentColor(context),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: Icon(
-                    IconlyBroken.message,
-                    size: 25,
-                    color: Repository.textColor(context),
-                  ),
-                ),
-                VerticalDivider(
-                  color: Styles.greyColor,
-                  indent: 10,
-                  endIndent: 10,
-                  thickness: 2,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 5),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Email',
-                        style: TextStyle(color: Repository.textColor(context)),
-                      ),
-                      SizedBox(
-                        width: 275,
-                        height: 30,
-                        child: TextFormField(
-                          readOnly: true,
-                          cursorColor: Repository.textColor(context),
-                          controller: _email,
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Repository.textColor(context)),
-                          decoration: InputDecoration(
-                            hintText: _currentUser.email,
-                            hintStyle: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Styles.darkGreyColor),
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                )
-              ],
-            ),
-          ),
-          const Gap(40),
-          elevatedButton(
-              color: Repository.selectedItemColor(context),
-              context: context,
-              text: 'Update',
-              callback: () async {
-                // print('Form Valid? ');
-                // print(autoAddFormKey.currentState
-                //     ?.validate()
-                //     .toString());
-                // if (autoAddFormKey.currentState!
-                //         .validate() &&
-                //     validDatetime) {
-                //   uploadImage();
-                // }
-                //   print(_vendor.text
-                //       .capitalizeFistWord());
-                //   print(Timestamp.fromDate(DateFormat(
-                //           'dd/MM/yyyy HH:mm')
-                //       .parseStrict(_receiptDate.text)));
-                //   print(receiptCategory);
-                //   print(
-                //       double.parse(_receiptAmount.text)
-                //           .toStringAsFixed(2));
-                //   print(_receiptWarranty.toString());
-              }),
-        ],
-      ),
-    );
+                )));
   }
 
   getUserData() async {
@@ -361,6 +518,9 @@ class _UserProfileState extends State<UserProfile> {
   }
 
   uploadImage(imgPath) async {
+    setState(() {
+      _isProcessing = true;
+    });
     final _firebaseStorage = FirebaseStorage.instance;
     final db = FirebaseFirestore.instance;
     //Select Image
@@ -382,6 +542,7 @@ class _UserProfileState extends State<UserProfile> {
           .update(data)
           .then((value) => setState(() {
                 profileImgUrl = downloadUrl;
+                _isProcessing = false;
               }))
           .onError((error, stackTrace) {
         print('object');
@@ -411,5 +572,48 @@ class _UserProfileState extends State<UserProfile> {
         print(error);
       });
     }
+  }
+
+  static Route<Object?> _dialogSuccessBuilder(
+      BuildContext context, Object? arguments) {
+    return CupertinoDialogRoute<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: const Text('Success'),
+          content: const Text('Update successfully.'),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static Route<Object?> _dialogFailBuilder(
+      BuildContext context, Object? arguments) {
+    return CupertinoDialogRoute<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: const Text('Alert'),
+          content: const Text('Password not matching.'),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
