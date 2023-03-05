@@ -4,10 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:tripo/auth/register_page.dart';
 import 'package:tripo/auth/fire_auth.dart';
 import 'package:tripo/auth/validator.dart';
+import 'package:tripo/utils/styles.dart';
+import 'package:tripo/widgets/buttons.dart';
 
 import '../widgets/bottom_nav.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({Key? key}) : super(key: key);
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -22,6 +26,7 @@ class _LoginPageState extends State<LoginPage> {
   final _focusPassword = FocusNode();
 
   bool _isProcessing = false;
+  bool _isError = false;
 
   Future<FirebaseApp> _initializeFirebase() async {
     FirebaseApp firebaseApp = await Firebase.initializeApp();
@@ -46,9 +51,9 @@ class _LoginPageState extends State<LoginPage> {
         _focusPassword.unfocus();
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text('Firebase Authentication'),
-        ),
+        // appBar: AppBar(
+        //   title: Text('Firebase Authentication'),
+        // ),
         body: FutureBuilder(
           future: _initializeFirebase(),
           builder: (context, snapshot) {
@@ -68,24 +73,29 @@ class _LoginPageState extends State<LoginPage> {
                     Form(
                       key: _formKey,
                       child: Column(
-                        children: <Widget>[
+                        children: [
                           TextFormField(
                             controller: _emailTextController,
                             focusNode: _focusEmail,
                             validator: (value) => Validator.validateEmail(
                               email: value,
                             ),
+                            cursorColor: Styles.primaryColor,
                             decoration: InputDecoration(
-                              hintText: "Email",
+                              hintText: 'Email',
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Styles.primaryColor),
+                              ),
                               errorBorder: UnderlineInputBorder(
                                 borderRadius: BorderRadius.circular(6.0),
-                                borderSide: BorderSide(
+                                borderSide: const BorderSide(
                                   color: Colors.red,
                                 ),
                               ),
                             ),
                           ),
-                          SizedBox(height: 8.0),
+                          const SizedBox(height: 8.0),
                           TextFormField(
                             controller: _passwordTextController,
                             focusNode: _focusPassword,
@@ -93,82 +103,94 @@ class _LoginPageState extends State<LoginPage> {
                             validator: (value) => Validator.validatePassword(
                               password: value,
                             ),
+                            cursorColor: Styles.primaryColor,
                             decoration: InputDecoration(
-                              hintText: "Password",
+                              hintText: 'Password',
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Styles.primaryColor),
+                              ),
                               errorBorder: UnderlineInputBorder(
                                 borderRadius: BorderRadius.circular(6.0),
-                                borderSide: BorderSide(
+                                borderSide: const BorderSide(
                                   color: Colors.red,
                                 ),
                               ),
                             ),
                           ),
-                          SizedBox(height: 24.0),
+                          const SizedBox(height: 24.0),
+                          if (_isError)
+                            const Padding(
+                              padding: EdgeInsets.only(bottom: 20),
+                              child: Text(
+                                'The email or password is incorrect, please try again.',
+                                style:
+                                    TextStyle(color: Colors.red, fontSize: 13),
+                              ),
+                            ),
                           _isProcessing
-                              ? CircularProgressIndicator()
+                              ? const CircularProgressIndicator()
                               : Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Expanded(
-                                      child: ElevatedButton(
-                                        onPressed: () async {
-                                          _focusEmail.unfocus();
-                                          _focusPassword.unfocus();
+                                        child: elevatedButton(
+                                            context: context,
+                                            callback: () async {
+                                              _focusEmail.unfocus();
+                                              _focusPassword.unfocus();
 
-                                          if (_formKey.currentState!
-                                              .validate()) {
-                                            setState(() {
-                                              _isProcessing = true;
-                                            });
+                                              if (_formKey.currentState!
+                                                  .validate()) {
+                                                setState(() {
+                                                  _isProcessing = true;
+                                                });
 
-                                            User? user = await FireAuth
-                                                .signInUsingEmailPassword(
-                                              email: _emailTextController.text,
-                                              password:
-                                                  _passwordTextController.text,
-                                            );
+                                                User? user = await FireAuth
+                                                    .signInUsingEmailPassword(
+                                                  email:
+                                                      _emailTextController.text,
+                                                  password:
+                                                      _passwordTextController
+                                                          .text,
+                                                );
 
-                                            setState(() {
-                                              _isProcessing = false;
-                                            });
+                                                setState(() {
+                                                  _isProcessing = false;
+                                                });
 
-                                            if (user != null) {
-                                              Navigator.of(context)
-                                                  .pushReplacement(
+                                                if (user != null) {
+                                                  _isError = false;
+                                                  Navigator.of(context)
+                                                      .pushReplacement(
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          const BottomNav(),
+                                                    ),
+                                                  );
+                                                } else {
+                                                  _isError = true;
+                                                }
+                                              }
+                                            },
+                                            text: 'Sign In')),
+                                    const SizedBox(width: 24.0),
+                                    Expanded(
+                                        child: elevatedButton(
+                                            color: Styles.darkGreyColor,
+                                            context: context,
+                                            callback: () {
+                                              Navigator.of(context).push(
                                                 MaterialPageRoute(
                                                   builder: (context) =>
-                                                      const BottomNav(),
+                                                      const RegisterPage(),
                                                 ),
                                               );
-                                            }
-                                          }
-                                        },
-                                        child: Text(
-                                          'Sign In',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(width: 24.0),
-                                    Expanded(
-                                      child: ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  RegisterPage(),
-                                            ),
-                                          );
-                                        },
-                                        child: Text(
-                                          'Register',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                    ),
+                                            },
+                                            text: 'Register')),
                                   ],
-                                )
+                                ),
                         ],
                       ),
                     )

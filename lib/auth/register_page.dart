@@ -2,13 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:tripo/auth/profile_page.dart';
 import 'package:tripo/auth/fire_auth.dart';
 import 'package:tripo/auth/validator.dart';
+import 'package:tripo/repo/repository.dart';
+import 'package:tripo/widgets/buttons.dart';
+import 'package:tripo/widgets/my_app_bar.dart';
 
+import '../utils/styles.dart';
 import '../widgets/bottom_nav.dart';
 
 class RegisterPage extends StatefulWidget {
+  const RegisterPage({Key? key}) : super(key: key);
+
   @override
   _RegisterPageState createState() => _RegisterPageState();
 }
@@ -27,6 +32,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final db = FirebaseFirestore.instance;
 
   bool _isProcessing = false;
+  bool _isError = false;
 
   @override
   Widget build(BuildContext context) {
@@ -37,9 +43,8 @@ class _RegisterPageState extends State<RegisterPage> {
         _focusPassword.unfocus();
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text('Register'),
-        ),
+        appBar:
+            myAppBar(title: 'Register', implyLeading: true, context: context),
         body: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Center(
@@ -56,34 +61,42 @@ class _RegisterPageState extends State<RegisterPage> {
                         validator: (value) => Validator.validateName(
                           name: value,
                         ),
+                        cursorColor: Styles.primaryColor,
                         decoration: InputDecoration(
-                          hintText: "Name",
+                          hintText: 'Name',
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Styles.primaryColor),
+                          ),
                           errorBorder: UnderlineInputBorder(
                             borderRadius: BorderRadius.circular(6.0),
-                            borderSide: BorderSide(
+                            borderSide: const BorderSide(
                               color: Colors.red,
                             ),
                           ),
                         ),
                       ),
-                      SizedBox(height: 16.0),
+                      const SizedBox(height: 16.0),
                       TextFormField(
                         controller: _emailTextController,
                         focusNode: _focusEmail,
                         validator: (value) => Validator.validateEmail(
                           email: value,
                         ),
+                        cursorColor: Styles.primaryColor,
                         decoration: InputDecoration(
-                          hintText: "Email",
+                          hintText: 'Email',
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Styles.primaryColor),
+                          ),
                           errorBorder: UnderlineInputBorder(
                             borderRadius: BorderRadius.circular(6.0),
-                            borderSide: BorderSide(
+                            borderSide: const BorderSide(
                               color: Colors.red,
                             ),
                           ),
                         ),
                       ),
-                      SizedBox(height: 16.0),
+                      const SizedBox(height: 16.0),
                       TextFormField(
                         controller: _passwordTextController,
                         focusNode: _focusPassword,
@@ -91,30 +104,45 @@ class _RegisterPageState extends State<RegisterPage> {
                         validator: (value) => Validator.validatePassword(
                           password: value,
                         ),
+                        cursorColor: Styles.primaryColor,
                         decoration: InputDecoration(
-                          hintText: "Password",
+                          hintText: 'Password',
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Styles.primaryColor),
+                          ),
                           errorBorder: UnderlineInputBorder(
                             borderRadius: BorderRadius.circular(6.0),
-                            borderSide: BorderSide(
+                            borderSide: const BorderSide(
                               color: Colors.red,
                             ),
                           ),
                         ),
                       ),
-                      SizedBox(height: 32.0),
+                      const SizedBox(height: 32.0),
+                      if (_isError)
+                        const Padding(
+                          padding: EdgeInsets.only(bottom: 20),
+                          child: Text(
+                            'The account already exists, please try login.',
+                            style: TextStyle(color: Colors.red, fontSize: 13),
+                          ),
+                        ),
                       _isProcessing
-                          ? CircularProgressIndicator()
+                          ? const CircularProgressIndicator()
                           : Row(
                               children: [
                                 Expanded(
-                                  child: ElevatedButton(
-                                    onPressed: () async {
-                                      setState(() {
-                                        _isProcessing = true;
-                                      });
-
+                                  child: elevatedButton(
+                                    // color:
+                                    //     Repository.selectedItemColor(context),
+                                    context: context,
+                                    text: 'Sign up',
+                                    callback: () async {
                                       if (_registerFormKey.currentState!
                                           .validate()) {
+                                        setState(() {
+                                          _isProcessing = true;
+                                        });
                                         User? user = await FireAuth
                                             .registerUsingEmailPassword(
                                           name: _nameTextController.text,
@@ -124,19 +152,20 @@ class _RegisterPageState extends State<RegisterPage> {
                                         );
 
                                         final userInfo = <String, dynamic>{
-                                          "name": _nameTextController.text,
-                                          "email": _emailTextController.text
+                                          'name': _nameTextController.text,
+                                          'email': _emailTextController.text
                                         };
 
-                                        db.collection("users").add(userInfo).then(
+                                        db.collection('users').add(userInfo).then(
                                             (DocumentReference doc) => print(
                                                 'DocumentSnapshot added with ID: ${doc.id}'));
 
-                                        var result = setState(() {
+                                        setState(() {
                                           _isProcessing = false;
                                         });
 
                                         if (user != null) {
+                                          _isError = false;
                                           Navigator.of(context)
                                               .pushAndRemoveUntil(
                                             MaterialPageRoute(
@@ -145,13 +174,11 @@ class _RegisterPageState extends State<RegisterPage> {
                                             ),
                                             ModalRoute.withName('/'),
                                           );
+                                        } else {
+                                          _isError = true;
                                         }
                                       }
                                     },
-                                    child: Text(
-                                      'Sign up',
-                                      style: TextStyle(color: Colors.white),
-                                    ),
                                   ),
                                 ),
                               ],
