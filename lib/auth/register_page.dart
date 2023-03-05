@@ -128,7 +128,9 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                         ),
                       _isProcessing
-                          ? const CircularProgressIndicator()
+                          ? CircularProgressIndicator(
+                              color: Styles.primaryColor,
+                            )
                           : Row(
                               children: [
                                 Expanded(
@@ -153,7 +155,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
                                         final userInfo = <String, dynamic>{
                                           'name': _nameTextController.text,
-                                          'email': _emailTextController.text
+                                          'email': _emailTextController.text,
+                                          'profile_photo_url': ''
                                         };
 
                                         db.collection('users').add(userInfo).then(

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tripo/auth/login_page.dart';
@@ -22,10 +23,13 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   late User _currentUser;
+  String documentId = '';
+  String profileImgUrl = '';
 
   @override
   void initState() {
     _currentUser = widget.user;
+    getUserData();
     super.initState();
   }
 
@@ -113,8 +117,8 @@ class _ProfileState extends State<Profile> {
                       backgroundColor: Styles.greenColor,
                       radius: 50,
                       child: ClipOval(
-                        child: _currentUser.photoURL != null
-                            ? Image.asset(Assets.jw)
+                        child: profileImgUrl != ''
+                            ? Image.network(profileImgUrl)
                             : Image.asset(Assets.defaultUserProfileImg),
                       ),
                     ),
@@ -129,9 +133,11 @@ class _ProfileState extends State<Profile> {
               context: context,
               callback: () {
                 Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => UserProfile(user: _currentUser)));
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                UserProfile(user: _currentUser)))
+                    .then((value) => getUserData());
               }),
           CustomListTile(
               icon: IconlyBold.shield_done,
@@ -152,5 +158,18 @@ class _ProfileState extends State<Profile> {
         ],
       ),
     );
+  }
+
+  getUserData() async {
+    final db = FirebaseFirestore.instance;
+    await db
+        .collection('users')
+        .where('email', isEqualTo: _currentUser.email)
+        .get()
+        .then((res) {
+      documentId = res.docs[0].id;
+      profileImgUrl = res.docs[0].get('profile_photo_url');
+    });
+    setState(() {});
   }
 }

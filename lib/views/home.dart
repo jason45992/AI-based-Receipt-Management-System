@@ -207,7 +207,7 @@ class _HomeState extends State<Home> {
                                   style: TextStyle(
                                       color: Repository.textColor(context),
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 18.0))
+                                      fontSize: 17.0))
                             ],
                           ),
                         ),
@@ -233,7 +233,7 @@ class _HomeState extends State<Home> {
                                   style: TextStyle(
                                       color: Repository.textColor(context),
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 18.0))
+                                      fontSize: 17.0))
                             ],
                           ),
                         ),
@@ -267,7 +267,7 @@ class _HomeState extends State<Home> {
                                   style: TextStyle(
                                       color: Repository.textColor(context),
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 18.0))
+                                      fontSize: 17.0))
                             ],
                           ),
                         ),

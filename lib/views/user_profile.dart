@@ -1,7 +1,12 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:document_scanner_flutter/configs/configs.dart';
 import 'package:document_scanner_flutter/document_scanner_flutter.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tripo/generated/assets.dart';
@@ -26,11 +31,13 @@ class _UserProfileState extends State<UserProfile> {
   late User _currentUser;
   final TextEditingController _name = TextEditingController();
   final TextEditingController _email = TextEditingController();
-  final TextEditingController _phone = TextEditingController();
+  String documentId = '';
+  String profileImgUrl = '';
 
   @override
   void initState() {
     _currentUser = widget.user;
+    getUserData();
     super.initState();
   }
 
@@ -94,8 +101,8 @@ class _UserProfileState extends State<UserProfile> {
                       child: CircleAvatar(
                         backgroundColor: Styles.greenColor,
                         radius: 50,
-                        backgroundImage: _currentUser.photoURL != null
-                            ? const AssetImage(Assets.jw)
+                        backgroundImage: profileImgUrl != ''
+                            ? Image.network(profileImgUrl).image
                             : const AssetImage(Assets.defaultUserProfileImg),
                       ),
                     )),
@@ -135,6 +142,7 @@ class _UserProfileState extends State<UserProfile> {
                                   onTap: () {
                                     Navigator.pop(context);
                                     uploadNewProfileImage();
+                                    setState(() {});
                                   },
                                 ),
                                 ListTile(
@@ -142,6 +150,8 @@ class _UserProfileState extends State<UserProfile> {
                                   title: new Text('Rmove Profile Photo'),
                                   onTap: () {
                                     Navigator.pop(context);
+                                    deleteProfileImg();
+                                    setState(() {});
                                     //set to default photo
                                   },
                                 ),
@@ -265,66 +275,7 @@ class _UserProfileState extends State<UserProfile> {
                             hintText: _currentUser.email,
                             hintStyle: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Repository.textColor(context)),
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                )
-              ],
-            ),
-          ),
-          const Gap(20),
-          Container(
-            height: 70,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Styles.greyColor, width: 2),
-              // color: Repository.accentColor(context),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: Icon(
-                    IconlyBroken.call,
-                    size: 25,
-                    color: Repository.textColor(context),
-                  ),
-                ),
-                VerticalDivider(
-                  color: Styles.greyColor,
-                  indent: 10,
-                  endIndent: 10,
-                  thickness: 2,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 5),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Mobile Number',
-                        style: TextStyle(color: Repository.textColor(context)),
-                      ),
-                      SizedBox(
-                        width: 275,
-                        height: 30,
-                        child: TextFormField(
-                          cursorColor: Repository.textColor(context),
-                          controller: _phone,
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Repository.textColor(context)),
-                          decoration: InputDecoration(
-                            hintText: _currentUser.phoneNumber,
-                            hintStyle: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Repository.textColor(context)),
+                                color: Styles.darkGreyColor),
                             border: InputBorder.none,
                           ),
                         ),
@@ -366,6 +317,19 @@ class _UserProfileState extends State<UserProfile> {
     );
   }
 
+  getUserData() async {
+    final db = FirebaseFirestore.instance;
+    await db
+        .collection('users')
+        .where('email', isEqualTo: _currentUser.email)
+        .get()
+        .then((res) {
+      documentId = res.docs[0].id;
+      profileImgUrl = res.docs[0].get('profile_photo_url');
+      setState(() {});
+    });
+  }
+
   Future<bool> uploadNewProfileImage() async {
     final ImagePicker _picker = ImagePicker();
     XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -388,12 +352,64 @@ class _UserProfileState extends State<UserProfile> {
         ],
       );
       if (croppedFile != null) {
-        // setState(() {
-        print(croppedFile.path);
-        // });
+        await deleteProfileImg();
+        await uploadImage(croppedFile.path);
         return true;
       }
     }
     return false;
+  }
+
+  uploadImage(imgPath) async {
+    final _firebaseStorage = FirebaseStorage.instance;
+    final db = FirebaseFirestore.instance;
+    //Select Image
+    var file = File(imgPath);
+
+    //Upload to Firebase
+    var snapshot = await _firebaseStorage
+        .ref()
+        .child('profile/' + imgPath.split('/').last)
+        .putFile(file);
+    var downloadUrl = await snapshot.ref.getDownloadURL();
+    print('imageUrl: ' + downloadUrl);
+
+    if (documentId.isNotEmpty) {
+      final data = <String, dynamic>{'profile_photo_url': downloadUrl};
+      await db
+          .collection('users')
+          .doc(documentId)
+          .update(data)
+          .then((value) => setState(() {
+                profileImgUrl = downloadUrl;
+              }))
+          .onError((error, stackTrace) {
+        print('object');
+      });
+    }
+  }
+
+  deleteProfileImg() async {
+    if (profileImgUrl.isNotEmpty) {
+      final db = FirebaseFirestore.instance;
+      final _firebaseStorage = FirebaseStorage.instance;
+      final desertRef = _firebaseStorage.ref().child('profile/' +
+          profileImgUrl.split('profile%2F')[1].split('.jpg')[0] +
+          '.jpg');
+      // Delete the file
+      await desertRef.delete();
+
+      final data = <String, dynamic>{'profile_photo_url': ''};
+      db
+          .collection('users')
+          .doc(documentId)
+          .update(data)
+          .then((value) => setState(() {
+                profileImgUrl = '';
+              }))
+          .onError((error, stackTrace) {
+        print(error);
+      });
+    }
   }
 }
