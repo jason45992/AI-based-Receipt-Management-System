@@ -24,7 +24,7 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
   late User _currentUser;
   List<Map<String, dynamic>> transactions = [];
   List<Map<String, dynamic>> filteredTransactions = [];
-  TextEditingController _searchKey = TextEditingController();
+  final TextEditingController _searchKey = TextEditingController();
   final GroupedItemScrollController itemScrollController =
       GroupedItemScrollController();
 
@@ -81,7 +81,7 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
                           });
                         },
                       ))),
-              const Gap(20),
+              const Gap(10),
               InkWell(
                   onTap: () async {
                     pickedDate = await showDateRangePicker(
@@ -113,52 +113,58 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
                       print('Date is not selected');
                     }
                   },
-                  child: Icon(
-                    IconlyBroken.calendar,
-                    color: Styles.primaryColor,
-                    size: 30,
-                  )),
+                  child: Container(
+                      height: 40,
+                      width: 40,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(50),
+                          color: Styles.greenColor),
+                      child: Icon(
+                        IconlyBroken.calendar,
+                        color: Styles.whiteColor,
+                        size: 30,
+                      ))),
             ],
           ),
           pickedDate?.start != null
-              ? InkWell(
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onTap: () {
-                    setState(() {
-                      pickedDate = null;
-                      filterContent();
-                    });
-                  },
-                  child: Container(
-                    height: 30,
-                    width: 240,
-                    margin: const EdgeInsets.fromLTRB(30, 55, 0, 30),
-                    padding: const EdgeInsets.only(left: 10),
-                    decoration: BoxDecoration(
-                        border: Border.all(
-                          width: 1.5,
-                          color: Styles.darkGreyColor,
-                        ),
-                        borderRadius: BorderRadius.circular(100)),
-                    child: Row(children: [
-                      Icon(
-                        Icons.date_range_outlined,
-                        color: Styles.primaryColor,
-                        size: 15,
+              ? Container(
+                  height: 30,
+                  width: 240,
+                  margin: const EdgeInsets.fromLTRB(30, 55, 0, 30),
+                  padding: const EdgeInsets.only(left: 10),
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                        width: 1.5,
+                        color: Styles.darkGreyColor,
                       ),
-                      const Gap(2),
-                      Text(DateFormat('dd/MM/yyyy').format(pickedDate!.start) +
-                          ' to ' +
-                          DateFormat('dd/MM/yyyy').format(pickedDate!.end)),
-                      const Gap(5),
-                      Icon(
-                        Icons.remove_circle,
-                        size: 20,
-                        color: Styles.redColor,
-                      )
-                    ]),
-                  ))
+                      borderRadius: BorderRadius.circular(100)),
+                  child: Row(children: [
+                    Icon(
+                      Icons.date_range_outlined,
+                      color: Styles.primaryColor,
+                      size: 15,
+                    ),
+                    const Gap(2),
+                    Text(DateFormat('dd/MM/yyyy').format(pickedDate!.start) +
+                        ' to ' +
+                        DateFormat('dd/MM/yyyy').format(pickedDate!.end)),
+                    const Gap(5),
+                    InkWell(
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onTap: () {
+                          setState(() {
+                            pickedDate = null;
+                            filterContent();
+                          });
+                        },
+                        child: Icon(
+                          Icons.remove_circle,
+                          size: 20,
+                          color: Styles.redColor,
+                        ))
+                  ]),
+                )
               : const SizedBox(),
           Container(
             margin: pickedDate?.start != null
