@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:tripo/utils/size_config.dart';
-import 'package:tripo/view_models/view_models.dart';
 
 class Styles {
   static Color primaryColor = const Color(0xFF282828);
@@ -13,6 +12,8 @@ class Styles {
   static Color whiteColor = const Color(0xFFF8F7F3);
   static Color buttonColor = const Color(0xFF4C66EE);
   static Color blueColor = const Color(0xFF4BACF7);
+
+  static Color redColor = const Color.fromARGB(255, 178, 87, 82);
   static TextStyle textStyle =
       TextStyle(fontSize: getProportionateScreenWidth(15));
   static TextStyle titleStyle = TextStyle(

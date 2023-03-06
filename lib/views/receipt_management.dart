@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:iconly/iconly.dart';
 import 'package:sticky_grouped_list/sticky_grouped_list.dart';
 import 'package:tripo/json/category_list.dart';
 import 'package:tripo/repo/repository.dart';
@@ -23,13 +24,14 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
   late User _currentUser;
   List<Map<String, dynamic>> transactions = [];
   List<Map<String, dynamic>> filteredTransactions = [];
-  final TextEditingController _searchKey = TextEditingController();
+  TextEditingController _searchKey = TextEditingController();
   final GroupedItemScrollController itemScrollController =
       GroupedItemScrollController();
 
   final List<bool> _warranty = [false];
-  final List<bool> _filterController = List.filled(categoryItems.length, false);
+  List<bool> _filterController = List.filled(categoryItems.length, false);
   int selectedCategoryIndex = -1;
+  DateTimeRange? pickedDate;
 
   var controller = ScrollController();
   var currentPage = 0;
@@ -53,33 +55,115 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
+                  margin: const EdgeInsets.only(left: 10),
                   padding: const EdgeInsets.fromLTRB(20, 5, 10, 5),
                   alignment: Alignment.center,
-                  width: size.width * 0.85,
+                  width: size.width * 0.75,
                   height: 50,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(50),
                     color: Repository.accentColor(context),
                   ),
-                  child: TextField(
-                    style: TextStyle(color: Repository.textColor(context)),
-                    controller: _searchKey,
-                    cursorColor: Repository.textColor(context),
-                    decoration: InputDecoration(
-                        hintStyle:
-                            TextStyle(color: Repository.textColor(context)),
-                        border: InputBorder.none,
-                        hintText: 'Search receipts'),
-                    onChanged: (value) {
+                  child: Container(
+                      margin: EdgeInsets.only(right: size.width * 0.2),
+                      child: TextField(
+                        style: TextStyle(color: Repository.textColor(context)),
+                        controller: _searchKey,
+                        cursorColor: Repository.textColor(context),
+                        decoration: InputDecoration(
+                            hintStyle:
+                                TextStyle(color: Repository.textColor(context)),
+                            border: InputBorder.none,
+                            hintText: 'Search receipts'),
+                        onChanged: (value) {
+                          setState(() {
+                            filterContent();
+                          });
+                        },
+                      ))),
+              const Gap(20),
+              InkWell(
+                  onTap: () async {
+                    pickedDate = await showDateRangePicker(
+                        builder: (context, child) {
+                          return dateTimepickerTheme(context, child);
+                        },
+                        context: context,
+                        firstDate: DateTime(
+                            2000), //DateTime.now() - not to allow to choose before today.
+                        lastDate: DateTime.now());
+
+                    if (pickedDate != null) {
+                      print(pickedDate);
                       setState(() {
                         filterContent();
                       });
-                    },
+                      // String formattedStartDate =
+                      //     DateFormat('dd/MM/yyyy').format(pickedDate.start);
+                      // print(formattedStartDate);
+                      // String formattedEndDate =
+                      //     DateFormat('dd/MM/yyyy').format(pickedDate.end);
+                      // print(formattedEndDate);
+                      //you can implement different kind of Date Format here according to your requirement
+                      // setState(() {
+                      //   _receiptDate.text =
+                      //       formattedDate; //set output date to TextField value.
+                      // });
+                    } else {
+                      print('Date is not selected');
+                    }
+                  },
+                  child: Icon(
+                    IconlyBroken.calendar,
+                    color: Styles.primaryColor,
+                    size: 30,
                   )),
             ],
           ),
+          pickedDate?.start != null
+              ? InkWell(
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  onTap: () {
+                    setState(() {
+                      pickedDate = null;
+                      filterContent();
+                    });
+                  },
+                  child: Container(
+                    height: 30,
+                    width: 240,
+                    margin: const EdgeInsets.fromLTRB(30, 55, 0, 30),
+                    padding: const EdgeInsets.only(left: 10),
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                          width: 1.5,
+                          color: Styles.darkGreyColor,
+                        ),
+                        borderRadius: BorderRadius.circular(100)),
+                    child: Row(children: [
+                      Icon(
+                        Icons.date_range_outlined,
+                        color: Styles.primaryColor,
+                        size: 15,
+                      ),
+                      const Gap(2),
+                      Text(DateFormat('dd/MM/yyyy').format(pickedDate!.start) +
+                          ' to ' +
+                          DateFormat('dd/MM/yyyy').format(pickedDate!.end)),
+                      const Gap(5),
+                      Icon(
+                        Icons.remove_circle,
+                        size: 20,
+                        color: Styles.redColor,
+                      )
+                    ]),
+                  ))
+              : const SizedBox(),
           Container(
-            margin: const EdgeInsets.fromLTRB(0, 50, 0, 0),
+            margin: pickedDate?.start != null
+                ? const EdgeInsets.fromLTRB(0, 80, 0, 0)
+                : const EdgeInsets.fromLTRB(0, 50, 0, 0),
             child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -169,7 +253,9 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
           //   child: ,
           // ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(15, 100, 15, 0),
+            padding: pickedDate?.start != null
+                ? const EdgeInsets.fromLTRB(15, 130, 15, 0)
+                : const EdgeInsets.fromLTRB(15, 100, 15, 0),
             child: StickyGroupedListView<Map<String, dynamic>, DateTime>(
               itemScrollController: itemScrollController,
               elements: filteredTransactions,
@@ -229,11 +315,17 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: ListTile(
               onTap: (() => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              ReceiptDetail(transaction: element)))
-                  .then((value) => getTransactions())),
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  ReceiptDetail(transaction: element)))
+                      .then((value) {
+                    getTransactions();
+                    _filterController =
+                        List.filled(categoryItems.length, false);
+                    pickedDate = null;
+                    _searchKey.text = '';
+                  })),
               isThreeLine: true,
               minLeadingWidth: 10,
               minVerticalPadding: 20,
@@ -362,8 +454,38 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
           .toList();
     }
 
+    if (pickedDate != null) {
+      filteredTransactions = filteredTransactions
+          .where((i) =>
+              DateFormat('dd/MM/yyyy HH:mm')
+                  .parse(i['date_time'])
+                  .isAfter(pickedDate!.start) &&
+              DateFormat('dd/MM/yyyy HH:mm')
+                  .parse(i['date_time'])
+                  .isBefore(pickedDate!.end.add(const Duration(days: 1))))
+          .toList();
+    }
+
     if (filteredTransactions.isNotEmpty) {
       itemScrollController.jumpTo(index: 0);
     }
+  }
+
+  Theme dateTimepickerTheme(BuildContext context, Widget? child) {
+    return Theme(
+      data: Theme.of(context).copyWith(
+        colorScheme: ColorScheme.light(
+          primary: Repository.headerColor(context), // <-- SEE HERE
+          onPrimary: Repository.accentColor(context), // <-- SEE HERE
+          onSurface: Repository.textColor(context), // <-- SEE HERE
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            primary: Repository.textColor(context), // button text color
+          ),
+        ),
+      ),
+      child: child!,
+    );
   }
 }
