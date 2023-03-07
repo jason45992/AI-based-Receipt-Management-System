@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:floating_bottom_navigation_bar/floating_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:tripo/repo/repository.dart';
 import 'package:iconly/iconly.dart';
-import 'package:tripo/utils/styles.dart';
+import 'package:tripo/repo/repository.dart';
 import 'package:tripo/views/home.dart';
 import 'package:tripo/views/profile.dart';
 import 'package:tripo/views/stats.dart';
@@ -45,35 +45,56 @@ class _BottomNavState extends State<BottomNav> {
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Repository.navbarColor(context),
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        selectedLabelStyle: TextStyle(fontSize: 25, color: Styles.primaryColor),
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Repository.selectedItemColor(context),
+      extendBody: true,
+      bottomNavigationBar: FloatingNavbar(
+        margin: const EdgeInsets.all(0),
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        backgroundColor: Repository.textColor(context),
+        borderRadius: 50,
+        width: MediaQuery.of(context).size.width * 0.9,
+        selectedBackgroundColor: Colors.transparent,
+        selectedItemColor: Repository.bg2Color(context),
         unselectedItemColor: Colors.grey.withOpacity(0.7),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(IconlyBold.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(IconlyBold.wallet),
-            label: 'Wallet',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(IconlyBold.chart),
-            label: 'Stats',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(IconlyBold.profile),
-            label: 'Profile',
-          ),
-        ],
+        onTap: (int val) {
+          _onItemTapped(val);
+        },
         currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+        items: [
+          FloatingNavbarItem(icon: IconlyBold.home),
+          FloatingNavbarItem(icon: IconlyBold.wallet),
+          FloatingNavbarItem(icon: IconlyBold.chart),
+          FloatingNavbarItem(icon: IconlyBold.profile),
+        ],
       ),
+      // BottomNavigationBar(
+      //   backgroundColor: Repository.navbarColor(context),
+      //   showSelectedLabels: false,
+      //   showUnselectedLabels: false,
+      //   selectedLabelStyle: TextStyle(fontSize: 25, color: Styles.primaryColor),
+      //   type: BottomNavigationBarType.fixed,
+      //   selectedItemColor: Repository.selectedItemColor(context),
+      //   unselectedItemColor: Colors.grey.withOpacity(0.7),
+      //   items: const [
+      //     BottomNavigationBarItem(
+      //       icon: Icon(IconlyBold.home),
+      //       label: 'Home',
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(IconlyBold.wallet),
+      //       label: 'Wallet',
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(IconlyBold.chart),
+      //       label: 'Stats',
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(IconlyBold.profile),
+      //       label: 'Profile',
+      //     ),
+      //   ],
+      //   currentIndex: _selectedIndex,
+      //   onTap: _onItemTapped,
+      // ),
     );
   }
 }

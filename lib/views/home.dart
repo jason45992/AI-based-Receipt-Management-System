@@ -3,7 +3,9 @@ import 'package:document_scanner_flutter/configs/configs.dart';
 import 'package:document_scanner_flutter/document_scanner_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:tripo/utils/pie_chart_indicator.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:snapping_sheet/snapping_sheet.dart';
+import 'package:tripo/generated/assets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
@@ -31,12 +33,17 @@ class _HomeState extends State<Home> {
   late User _currentUser;
   List<Map<String, dynamic>> transactions = [];
   List<String> filterOptions = ['Latest', 'Today', 'Week', 'Month'];
-  String currentFilterOption = 'Week';
+
+  List<double> categoryPecent = [];
+  String currentFilterOption = 'Latest';
   int touchedIndex = -1;
+  String documentId = '';
+  String profileImgUrl = '';
 
   @override
   void initState() {
     _currentUser = FirebaseAuth.instance.currentUser!;
+    getUserData();
     getTransactions();
     super.initState();
   }
@@ -61,273 +68,345 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     SizeConfig.init(context);
     final size = Layouts.getSize(context);
-    return Material(
-      color: Repository.bgColor(context),
-      elevation: 0,
-      child: Stack(
-        children: [
-          Container(
-            width: double.infinity,
-            height: size.height * 0.47,
-            color: Repository.headerColor(context),
-          ),
-          Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: Column(children: [
-                Gap(getProportionateScreenHeight(70)),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Hi ${_currentUser.displayName}',
-                            style: TextStyle(
-                                color: Colors.white.withOpacity(0.7),
-                                fontSize: 16)),
-                        const Gap(3),
-                        const Text('Welcome back',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold))
-                      ],
-                    ),
-                    InkWell(
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                        ),
-                        child: Icon(
-                          IconlyBold.notification,
-                          color: Styles.accentColor,
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-                const Gap(15),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      height: size.height * 0.23,
-                      width: size.width * 0.54,
-                      // padding: const EdgeInsets.fromLTRB(16, 10, 0, 20),
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.horizontal(
-                            left: Radius.circular(15)),
-                        color: Colors.black.withOpacity(0.3),
-                      ),
-                      child: AspectRatio(
-                        aspectRatio: 1,
-                        child: PieChart(
-                          PieChartData(
-                            pieTouchData: PieTouchData(
-                              touchCallback:
-                                  (FlTouchEvent event, pieTouchResponse) {
-                                setState(() {
-                                  if (!event.isInterestedForInteractions ||
-                                      pieTouchResponse == null ||
-                                      pieTouchResponse.touchedSection == null) {
-                                    touchedIndex = -1;
-                                    return;
-                                  }
-                                  touchedIndex = pieTouchResponse
-                                      .touchedSection!.touchedSectionIndex;
-                                });
-                              },
-                            ),
-                            borderData: FlBorderData(
-                              show: false,
-                            ),
-                            sectionsSpace: 0,
-                            centerSpaceRadius: 33,
-                            sections: showingSections(),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                        height: size.height * 0.23,
-                        width: size.width * 0.36,
-                        padding: const EdgeInsets.fromLTRB(10, 10, 0, 20),
-                        decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.horizontal(
-                                right: Radius.circular(15)),
-                            color: Styles.yellowColor),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: getIndicator(),
-                        )),
-                  ],
-                ),
-                const Gap(15),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    color: Repository.accentColor(context),
-                    // boxShadow: [
-                    //   BoxShadow(
-                    //     color: Colors.black.withOpacity(0.3),
-                    //     spreadRadius: 1,
-                    //     blurRadius: 10,
-                    //     offset:
-                    //         const Offset(0, 5), // changes position of shadow
-                    //   ),
-                    // ]
-                  ),
-                  child: Row(
+    return Scaffold(
+        body: SnappingSheet(
+      snappingPositions: const [
+        SnappingPosition.pixels(
+          positionPixels: 320,
+          snappingCurve: Curves.elasticOut,
+          snappingDuration: Duration(milliseconds: 1750),
+        ),
+        SnappingPosition.factor(
+          positionFactor: 0.859,
+          snappingCurve: Curves.bounceOut,
+          snappingDuration: Duration(seconds: 1),
+          grabbingContentOffset: GrabbingContentOffset.bottom,
+        ),
+      ],
+      // Top area
+      child: Container(
+          color: Repository.navbarColor(context),
+          child: Stack(children: [
+            Container(
+              width: double.infinity,
+              height: size.height,
+              decoration: BoxDecoration(
+                  color: Repository.navbarColor(context),
+                  borderRadius: BorderRadius.circular(40)),
+            ),
+            Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: Column(children: [
+                  Gap(getProportionateScreenHeight(70)),
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      InkWell(
-                        onTap: () {
-                          getImage('camera');
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          width: 100,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.rectangle,
-                            borderRadius: BorderRadius.circular(20.0),
-                            color: Colors.grey.withOpacity(0.15),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Icon(IconlyBold.scan,
-                                  color: Repository.textColor(context)),
-                              Text('Scan',
-                                  style: TextStyle(
-                                      color: Repository.textColor(context),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 17.0))
-                            ],
-                          ),
-                        ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Hi ${_currentUser.displayName}',
+                              style: TextStyle(
+                                  color: Repository.subTextColor(context),
+                                  fontSize: 16)),
+                          const Gap(3),
+                          Text('Welcome back',
+                              style: TextStyle(
+                                  color: Repository.textColor(context),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold))
+                        ],
                       ),
                       InkWell(
-                        onTap: () {
-                          getImage('gallery');
-                        },
                         child: Container(
-                          padding: const EdgeInsets.all(16),
-                          width: 120,
+                          padding: const EdgeInsets.all(3),
                           decoration: BoxDecoration(
-                            shape: BoxShape.rectangle,
-                            borderRadius: BorderRadius.circular(20.0),
-                            color: Colors.grey.withOpacity(0.15),
+                            border: Border.all(
+                              width: 1.5,
+                              color: Styles.darkGreyColor,
+                            ),
+                            shape: BoxShape.circle,
+                            color: Colors.transparent,
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Icon(IconlyBold.image,
-                                  color: Repository.textColor(context)),
-                              Text('Upload',
-                                  style: TextStyle(
-                                      color: Repository.textColor(context),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 17.0))
-                            ],
+                          child: CircleAvatar(
+                            backgroundColor: Styles.greenColor,
+                            radius: 20,
+                            child: ClipOval(
+                              child: profileImgUrl != ''
+                                  ? Image.network(profileImgUrl)
+                                  : Image.asset(Assets.defaultUserProfileImg),
+                            ),
                           ),
+
+                          // Icon(
+                          //   Icons.more_vert,
+                          //   color: Styles.accentColor,
+                          // ),
                         ),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const AddReceipt()))
-                              .then((value) => setState(
-                                    () {
-                                      getTransactions();
-                                    },
-                                  ));
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          width: 100,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.rectangle,
-                            borderRadius: BorderRadius.circular(20.0),
-                            color: Colors.grey.withOpacity(0.15),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Icon(IconlyBold.paper,
-                                  color: Repository.textColor(context)),
-                              Text('Add',
-                                  style: TextStyle(
-                                      color: Repository.textColor(context),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 17.0))
-                            ],
-                          ),
-                        ),
-                      ),
+                      )
                     ],
                   ),
-                ),
-                const Gap(15),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Transactions',
-                        style: TextStyle(
-                            color: Repository.textColor(context),
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold)),
-                    DropdownButton<String>(
-                      isDense: true,
-                      value: currentFilterOption,
-                      icon: Icon(CupertinoIcons.chevron_down,
-                          color: Repository.subTextColor(context), size: 17),
-                      // elevation: 16,
+                  const Gap(5),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        height: size.height * 0.23,
+                        width: size.width * 0.54,
+                        // padding: const EdgeInsets.fromLTRB(16, 10, 0, 20),
+                        decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.horizontal(
+                              left: Radius.circular(15)),
+                          color: Colors.transparent,
+                        ),
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: PieChart(
+                            PieChartData(
+                              pieTouchData: PieTouchData(
+                                touchCallback:
+                                    (FlTouchEvent event, pieTouchResponse) {
+                                  setState(() {
+                                    if (!event.isInterestedForInteractions ||
+                                        pieTouchResponse == null ||
+                                        pieTouchResponse.touchedSection ==
+                                            null) {
+                                      touchedIndex = -1;
+                                      return;
+                                    }
+                                    touchedIndex = pieTouchResponse
+                                        .touchedSection!.touchedSectionIndex;
+                                  });
+                                },
+                              ),
+                              borderData: FlBorderData(
+                                show: false,
+                              ),
+                              sectionsSpace: 0,
+                              // startDegreeOffset: 10,
+                              centerSpaceRadius: 55,
+                              sections: showingSections(),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Container(
+                      //     height: size.height * 0.26,
+                      //     width: size.width * 0.36,
+                      //     padding: const EdgeInsets.fromLTRB(10, 10, 0, 20),
+                      //     decoration: BoxDecoration(
+                      //         borderRadius: const BorderRadius.horizontal(
+                      //             right: Radius.circular(15)),
+                      //         color: Styles.yellowColor),
+                      //     child: Column(
+                      //       mainAxisAlignment: MainAxisAlignment.end,
+                      //       crossAxisAlignment: CrossAxisAlignment.start,
+                      //       children: getIndicator(),
+                      //     )),
+                    ],
+                  ),
+                  const Gap(15),
+                  SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: getIndicator())),
+                  const Gap(15),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 15, vertical: 12),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(25),
+                      color: Styles.purewhiteColor.withOpacity(0.4),
+                      // boxShadow: [
+                      //   BoxShadow(
+                      //     color: Colors.black.withOpacity(0.3),
+                      //     spreadRadius: 1,
+                      //     blurRadius: 10,
+                      //     offset:
+                      //         const Offset(0, 5), // changes position of shadow
+                      //   ),
+                      // ]
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            getImage('camera');
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            width: 100,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.rectangle,
+                              borderRadius: BorderRadius.circular(20.0),
+                              color: Colors.grey.withOpacity(0.15),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Icon(IconlyBold.scan,
+                                    color: Repository.textColor(context)),
+                                Text('Scan',
+                                    style: TextStyle(
+                                        color: Repository.textColor(context),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 17.0))
+                              ],
+                            ),
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            getImage('gallery');
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            width: 120,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.rectangle,
+                              borderRadius: BorderRadius.circular(20.0),
+                              color: Colors.grey.withOpacity(0.15),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Icon(IconlyBold.image,
+                                    color: Repository.textColor(context)),
+                                Text('Upload',
+                                    style: TextStyle(
+                                        color: Repository.textColor(context),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 17.0))
+                              ],
+                            ),
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const AddReceipt()))
+                                .then((value) => setState(
+                                      () {
+                                        getTransactions();
+                                      },
+                                    ));
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            width: 100,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.rectangle,
+                              borderRadius: BorderRadius.circular(20.0),
+                              color: Colors.grey.withOpacity(0.15),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Icon(IconlyBold.paper,
+                                    color: Repository.textColor(context)),
+                                Text('Add',
+                                    style: TextStyle(
+                                        color: Repository.textColor(context),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 17.0))
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ])),
+          ])),
+      grabbingHeight: 70,
+      // Dragging area,
+      grabbing: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          decoration: BoxDecoration(
+            // boxShadow: const [
+            //   BoxShadow(
+            //     offset: Offset(0, 1),
+            //     color: Colors.grey,
+            //     blurRadius: 5,
+            //     spreadRadius: 1,
+            //   )
+            // ],
+            color: Repository.bg2Color(context),
+            borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 20),
+                width: 50,
+                height: 5,
+                decoration: BoxDecoration(
+                    color: Styles.primaryColor,
+                    borderRadius: BorderRadius.circular(50)),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Transactions',
                       style: TextStyle(
-                          color: Repository.subTextColor(context),
-                          fontSize: 16),
-                      underline: const SizedBox(),
-                      onChanged: (String? value) {
-                        // This is called when the user selects an item.
-                        // setState(() {
-                        currentFilterOption = value!;
-                        getTransactions();
-                        // });
-                      },
-                      items: filterOptions
-                          .map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    )
-                  ],
-                ),
-              ])),
-          Padding(
-            padding: const EdgeInsets.only(top: 480),
-            child: ListView(
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              children: [
-                MediaQuery.removePadding(
-                  removeTop: true,
-                  context: context,
-                  child: getTransactionList(),
-                ),
-              ],
-            ),
-          )
-        ],
+                          color: Repository.textColor(context),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold)),
+                  DropdownButton<String>(
+                    isDense: true,
+                    value: currentFilterOption,
+                    icon: Icon(CupertinoIcons.chevron_down,
+                        color: Repository.subTextColor(context), size: 17),
+                    // elevation: 16,
+                    style: TextStyle(
+                        color: Repository.subTextColor(context), fontSize: 16),
+                    underline: const SizedBox(),
+                    onChanged: (String? value) {
+                      // This is called when the user selects an item.
+                      // setState(() {
+                      currentFilterOption = value!;
+                      getTransactions();
+                      // });
+                    },
+                    items: filterOptions
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  )
+                ],
+              ),
+            ],
+          )),
+      // Transaction area
+      sheetBelow: SnappingSheetContent(
+        sizeBehavior: SheetSizeStatic(size: 300),
+        draggable: false,
+        child: Container(
+          color: Repository.bg2Color(context),
+          padding: const EdgeInsets.only(top: 10),
+          child: ListView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            children: [
+              MediaQuery.removePadding(
+                removeTop: true,
+                context: context,
+                child: getTransactionList(),
+              ),
+            ],
+          ),
+        ),
       ),
-    );
+    ));
   }
 
   Future<void> getTransactions() async {
@@ -435,7 +514,7 @@ class _HomeState extends State<Home> {
 
   Widget getTransactionList() {
     if (transactions.isEmpty) {
-      return notFound();
+      return notFound(context);
     } else {
       return ListView.separated(
         itemCount: transactions.length,
@@ -487,6 +566,7 @@ class _HomeState extends State<Home> {
 
   List<PieChartSectionData> showingSections() {
     List<PieChartSectionData> result = [];
+    categoryPecent = [];
 
     double totalAllAmount = 0;
     for (var element in transactions) {
@@ -504,6 +584,7 @@ class _HomeState extends State<Home> {
         }
         double percent =
             ((totalCategoryAmount / totalAllAmount)).toPrecision(3);
+        categoryPecent.add(percent);
         final isTouched = index == touchedIndex;
         final fontSize = isTouched ? 16.0 : 12.0;
         final radius = isTouched ? 60.0 : 50.0;
@@ -511,7 +592,7 @@ class _HomeState extends State<Home> {
         result.add(PieChartSectionData(
           color: getIconColor(i.toString()),
           value: percent,
-          title: (((percent * 100).toPrecision(2)).toString()) + '%',
+          title: (((totalCategoryAmount).toPrecision(2)).toString()),
           radius: radius,
           titleStyle: TextStyle(
             fontSize: fontSize,
@@ -530,16 +611,61 @@ class _HomeState extends State<Home> {
     var categoryMap = groupBy(transactions, (Map obj) => obj['category']);
     List<dynamic> keys = categoryMap.keys.toList();
     keys.forEachIndexed((index, element) {
-      result.add(Indicator(
-        color: getIconColor(keys[index]),
-        text: keys[index],
-        isSquare: true,
-        size: 10,
+      double percent = categoryPecent[index];
+      result.add(Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: Text(
+                keys[index],
+                style: TextStyle(
+                    fontSize: 13, color: Repository.subTextColor(context)),
+              )),
+          const Gap(2),
+          Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: Text(
+                (((percent * 100).toPrecision(2)).toString()) + '%',
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Repository.textColor(context)),
+              )),
+          LinearPercentIndicator(
+            barRadius: const Radius.circular(100),
+            width: MediaQuery.of(context).size.width - 300,
+            animation: true,
+            lineHeight: 8.0,
+            animationDuration: 500,
+            percent: percent,
+            progressColor: getIconColor(keys[index]),
+          )
+        ],
       ));
       result.add(const SizedBox(
-        height: 4,
+        width: 20,
       ));
+      // result.add(Indicator(
+      //   color: getIconColor(keys[index]),
+      //   text: keys[index],
+      //   isSquare: true,
+      //   size: 10,
+      // ));
     });
     return result;
+  }
+
+  getUserData() async {
+    final db = FirebaseFirestore.instance;
+    await db
+        .collection('users')
+        .where('email', isEqualTo: _currentUser.email)
+        .get()
+        .then((res) {
+      documentId = res.docs[0].id;
+      profileImgUrl = res.docs[0].get('profile_photo_url');
+    });
+    setState(() {});
   }
 }

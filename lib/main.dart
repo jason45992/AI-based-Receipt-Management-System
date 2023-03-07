@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [ChangeNotifierProvider(create: (_) => ViewModel())],
       child: MaterialApp(
-        title: 'Flutter Banking App',
+        title: 'Tripo',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           fontFamily: 'DMSans',
@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
           '/authentication': (BuildContext context) => const Authentication(),
           '/onboarding': (BuildContext context) => const Onboarding(),
           '/home': (BuildContext context) => const BottomNav(),
-          '/login': (BuildContext context) => LoginPage(),
+          '/login': (BuildContext context) => const LoginPage(),
         },
       ),
     );

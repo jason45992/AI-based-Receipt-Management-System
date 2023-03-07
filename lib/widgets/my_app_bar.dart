@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:tripo/repo/repository.dart';
 import 'package:iconly/iconly.dart';
 import 'package:gap/gap.dart';
@@ -11,6 +12,7 @@ AppBar myAppBar(
     bool? hasAction}) {
   return AppBar(
     centerTitle: true,
+    systemOverlayStyle: SystemUiOverlayStyle.dark,
     title: Text(
       title,
       style: TextStyle(color: Repository.textColor(context), fontSize: 18),

@@ -6,6 +6,7 @@ import 'package:percent_indicator/percent_indicator.dart';
 import 'package:tripo/json/category_list.dart';
 import 'package:tripo/utils/functions.dart';
 import 'package:tripo/repo/repository.dart';
+import 'package:tripo/utils/styles.dart';
 import 'package:tripo/widgets/my_app_bar.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
@@ -27,6 +28,9 @@ class _StatsState extends State<Stats> {
   late User _currentUser;
   List<Map<String, dynamic>> transactions = [];
   double totalExpenses = 0;
+  DateTimeRange? pickedDate;
+  DateTime filterStartdate = DateTime.now();
+  DateTime filterEnddate = DateTime.now();
 
   @override
   void initState() {
@@ -49,9 +53,9 @@ class _StatsState extends State<Stats> {
         children: <Widget>[
           AnimatedToggleSwitch<String>.size(
             current: _currentRange,
-            values: const ['Today', 'Week', 'Month'],
+            values: const ['Today', 'Week', 'Month', 'Date'],
             indicatorSize: const Size.fromWidth(150),
-            indicatorColor: Repository.headerColor(context),
+            indicatorColor: Repository.textColor(context),
             borderRadius: BorderRadius.circular(100),
             innerColor: Repository.bgColor(context),
             borderColor: Repository.accentColor(context),
@@ -66,7 +70,7 @@ class _StatsState extends State<Stats> {
                           fontSize: 17,
                           fontWeight: FontWeight.w500,
                           color: local.value == _currentRange
-                              ? Colors.white
+                              ? Repository.navbarColor(context)
                               : Repository.titleColor(context)))
                 ],
               );
@@ -76,6 +80,93 @@ class _StatsState extends State<Stats> {
               getTransactions();
             },
           ),
+          _currentRange == 'Date'
+              ? Container(
+                  height: 50,
+                  width: 240,
+                  margin: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+                  padding: const EdgeInsets.only(left: 10),
+                  decoration: BoxDecoration(
+                      // color: Styles.greyColor,
+                      border: Border.all(
+                        width: 1.5,
+                        color: Styles.greyColor,
+                      ),
+                      borderRadius: BorderRadius.circular(100)),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text.rich(TextSpan(
+                            text: 'From ',
+                            style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                                color: Repository.subTextColor(context)),
+                            children: <TextSpan>[
+                              TextSpan(
+                                  text: DateFormat('dd/MM/yyyy')
+                                      .format(filterStartdate),
+                                  style: TextStyle(
+                                      decoration: TextDecoration.underline,
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.normal,
+                                      color: Repository.subTextColor(context)),
+                                  children: <TextSpan>[
+                                    TextSpan(
+                                        text: ' to ',
+                                        style: TextStyle(
+                                            decoration: TextDecoration.none,
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.bold,
+                                            color: Repository.subTextColor(
+                                                context)),
+                                        children: <TextSpan>[
+                                          TextSpan(
+                                            text: DateFormat('dd/MM/yyyy')
+                                                .format(filterEnddate),
+                                            style: TextStyle(
+                                                decoration:
+                                                    TextDecoration.underline,
+                                                fontSize: 17,
+                                                fontWeight: FontWeight.normal,
+                                                color: Repository.subTextColor(
+                                                    context)),
+                                          )
+                                        ])
+                                  ])
+                            ])),
+                        const Gap(5),
+                        InkWell(
+                            splashColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onTap: () async {
+                              pickedDate = await showDateRangePicker(
+                                  builder: (context, child) {
+                                    return dateTimepickerTheme(context, child);
+                                  },
+                                  context: context,
+                                  firstDate: DateTime(
+                                      2000), //DateTime.now() - not to allow to choose before today.
+                                  lastDate: DateTime.now());
+
+                              if (pickedDate != null) {
+                                setState(() {
+                                  filterStartdate = pickedDate!.start;
+                                  filterEnddate = pickedDate!.end;
+                                  getTransactions();
+                                });
+                              } else {
+                                print('Date is not selected');
+                              }
+                            },
+                            child: Icon(
+                              Icons.edit_calendar_outlined,
+                              size: 20,
+                              color: Repository.textColor(context),
+                            ))
+                      ]),
+                )
+              : const SizedBox(),
           const Gap(20),
           Container(
             width: double.infinity,
@@ -203,6 +294,31 @@ class _StatsState extends State<Stats> {
               onError: (e) => print('Error completing: $e'),
             );
         break;
+      case 'Date':
+        Timestamp startDate = Timestamp.fromDate(DateTime(filterStartdate.year,
+            filterStartdate.month, filterStartdate.day, 0, 0, 0));
+        Timestamp endDate = Timestamp.fromDate(DateTime(filterEnddate.year,
+            filterEnddate.month, filterEnddate.day + 1, 0, 0, 0));
+        await db
+            .collection('receipts')
+            .where('user_email', isEqualTo: _currentUser.email)
+            .where('date_time',
+                isLessThan: endDate, isGreaterThanOrEqualTo: startDate)
+            .orderBy('date_time', descending: true)
+            .get()
+            .then(
+              (res) => res.docs.forEach((element) {
+                Map<String, dynamic> item = element.data();
+                item['icon'] = getIcon(element.data()['category']);
+                item['iconColor'] = getIconColor(element.data()['category']);
+                item['date_time'] = DateFormat('dd/MM/yyyy HH:mm')
+                    .format(element.data()['date_time'].toDate());
+                transactions.add(item);
+                totalExpenses += double.parse(element['total_amount']);
+              }),
+              onError: (e) => print('Error completing: $e'),
+            );
+        break;
     }
     setState(() {});
   }
@@ -210,7 +326,7 @@ class _StatsState extends State<Stats> {
   List<Widget> getCategoryPercent() {
     List<Widget> result = [];
     if (transactions.isEmpty) {
-      result.add(notFound());
+      result.add(notFound(context));
     } else {
       List<Map<String, dynamic>> resultsMap = [];
       var categoryMap = groupBy(transactions, (Map obj) => obj['category']);
@@ -310,5 +426,23 @@ class _StatsState extends State<Stats> {
       }
     }
     return result;
+  }
+
+  Theme dateTimepickerTheme(BuildContext context, Widget? child) {
+    return Theme(
+      data: Theme.of(context).copyWith(
+        colorScheme: ColorScheme.light(
+          primary: Repository.headerColor(context), // <-- SEE HERE
+          onPrimary: Repository.accentColor(context), // <-- SEE HERE
+          onSurface: Repository.textColor(context), // <-- SEE HERE
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            primary: Repository.textColor(context), // button text color
+          ),
+        ),
+      ),
+      child: child!,
+    );
   }
 }

@@ -9,6 +9,11 @@ class Repository {
     return vm.isDark == true ? Styles.primaryColor : Styles.whiteColor;
   }
 
+  static Color bg2Color(BuildContext context) {
+    final vm = context.watch<ViewModel>();
+    return vm.isDark == true ? Styles.primaryColor : Styles.purewhiteColor;
+  }
+
   static Color cardColor(BuildContext context) {
     final vm = context.watch<ViewModel>();
     return vm.isDark == true ? Styles.greenColor : Styles.accentColor;
@@ -28,7 +33,7 @@ class Repository {
     final vm = context.watch<ViewModel>();
     return vm.isDark == true
         ? Styles.primaryWithOpacityColor
-        : Styles.whiteColor;
+        : Styles.whiteBrownColor;
   }
 
   static Color selectedItemColor(BuildContext context) {

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
 import 'package:gap/gap.dart';
+import 'package:tripo/repo/repository.dart';
 
-Widget notFound() {
+Widget notFound(BuildContext context) {
   return Center(
       child: Column(
     mainAxisAlignment: MainAxisAlignment.center,
@@ -22,7 +23,10 @@ Widget notFound() {
         ),
       ),
       const Gap(20),
-      const Text('No Transaction Found')
+      Text(
+        'No Transaction Found',
+        style: TextStyle(color: Repository.textColor(context)),
+      )
     ],
   ));
 }

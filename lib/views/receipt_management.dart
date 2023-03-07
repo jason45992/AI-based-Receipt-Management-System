@@ -98,17 +98,6 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
                       setState(() {
                         filterContent();
                       });
-                      // String formattedStartDate =
-                      //     DateFormat('dd/MM/yyyy').format(pickedDate.start);
-                      // print(formattedStartDate);
-                      // String formattedEndDate =
-                      //     DateFormat('dd/MM/yyyy').format(pickedDate.end);
-                      // print(formattedEndDate);
-                      //you can implement different kind of Date Format here according to your requirement
-                      // setState(() {
-                      //   _receiptDate.text =
-                      //       formattedDate; //set output date to TextField value.
-                      // });
                     } else {
                       print('Date is not selected');
                     }
@@ -118,15 +107,15 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
                       width: 40,
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(50),
-                          color: Styles.greenColor),
+                          color: Repository.textColor(context)),
                       child: Icon(
                         IconlyBroken.calendar,
-                        color: Styles.whiteColor,
-                        size: 30,
+                        color: Repository.navbarColor(context),
+                        size: 25,
                       ))),
             ],
           ),
-          pickedDate?.start != null
+          pickedDate != null
               ? Container(
                   height: 30,
                   width: 240,

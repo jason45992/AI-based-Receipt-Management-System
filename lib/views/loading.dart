@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:snapping_sheet/snapping_sheet.dart';
+import 'package:tripo/widgets/my_app_bar.dart';
 
 class Loading extends StatefulWidget {
   const Loading({Key? key}) : super(key: key);
@@ -8,42 +11,54 @@ class Loading extends StatefulWidget {
 }
 
 class _LoadingState extends State<Loading> {
-  bool _isLoading = false; //bool variable created
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        ElevatedButton(
-          onPressed: () async {
-            setState(() {
-              _isLoading = true;
-            });
-            await Future.delayed(const Duration(seconds: 5));
-//for demo I had use delayed method. When you integrate use your api //call here.
-            setState(() {
-              _isLoading = false;
-            });
-          },
-          child: const Text("Click to start fetching"),
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        Container(
-          padding: const EdgeInsets.all(50),
-          margin: const EdgeInsets.all(50),
-          color: Colors.blue[100],
-//widget shown according to the state
-          child: Center(
-            child: !_isLoading
-                ? const Text("Loading Complete")
-                : const CircularProgressIndicator(),
+      appBar: myAppBar(
+          title: "Placeholder Example", implyLeading: false, context: context),
+      body: Container(
+        constraints: BoxConstraints.expand(),
+        child: SnappingSheet(
+          snappingPositions: [
+            SnappingPosition.factor(
+              positionFactor: 0.0,
+              snappingCurve: Curves.easeOutExpo,
+              snappingDuration: Duration(seconds: 1),
+              grabbingContentOffset: GrabbingContentOffset.top,
+            ),
+            SnappingPosition.factor(
+              snappingCurve: Curves.elasticOut,
+              snappingDuration: Duration(milliseconds: 1750),
+              positionFactor: 0.5,
+            ),
+            SnappingPosition.factor(
+              grabbingContentOffset: GrabbingContentOffset.bottom,
+              snappingCurve: Curves.bounceOut,
+              snappingDuration: Duration(seconds: 1),
+              positionFactor: 1.0,
+            ),
+          ],
+          // child: DummyBackgroundContent(),
+          grabbingHeight: 100,
+          grabbing: Container(
+            color: Colors.white.withOpacity(0.75),
+            child: Placeholder(color: Colors.black),
           ),
-        )
-      ],
-    ));
+          sheetAbove: SnappingSheetContent(
+            draggable: true,
+            child: Container(
+                color: Colors.white.withOpacity(0.75),
+                child: Placeholder(color: Colors.green)),
+          ),
+          sheetBelow: SnappingSheetContent(
+            draggable: true,
+            child: Container(
+              color: Colors.white.withOpacity(0.75),
+              child: Placeholder(color: Colors.green[800] ?? Colors.green),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
