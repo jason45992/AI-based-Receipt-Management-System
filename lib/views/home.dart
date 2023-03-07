@@ -192,7 +192,9 @@ class _HomeState extends State<Home> {
                                               color:
                                                   Repository.textColor(context),
                                               fontWeight: FontWeight.bold,
-                                              fontSize: 30)),
+                                              fontSize: totalAllAmount < 9999
+                                                  ? 30
+                                                  : 25)),
                                     ],
                                   ),
                                 ))
