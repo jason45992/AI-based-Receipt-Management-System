@@ -58,7 +58,7 @@ IconData getIcon(String category) {
     case 'Food':
       return Icons.fastfood;
     case 'Beauty':
-      return CupertinoIcons.house_fill;
+      return Icons.face_retouching_natural;
     case 'Supermarket':
       return Icons.store;
     case 'Shopping':
@@ -80,7 +80,7 @@ Color getIconColor(String category) {
     case 'Food':
       return const Color.fromARGB(255, 190, 136, 70);
     case 'Beauty':
-      return const Color(0xFFFF736C);
+      return const Color(0xffb0655a);
     case 'Supermarket':
       return const Color.fromARGB(255, 105, 100, 157);
     case 'Shopping':
