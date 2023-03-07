@@ -470,7 +470,7 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
     return Theme(
       data: Theme.of(context).copyWith(
         colorScheme: ColorScheme.light(
-          primary: Repository.headerColor(context), // <-- SEE HERE
+          primary: Repository.textColor(context), // <-- SEE HERE
           onPrimary: Repository.accentColor(context), // <-- SEE HERE
           onSurface: Repository.textColor(context), // <-- SEE HERE
         ),

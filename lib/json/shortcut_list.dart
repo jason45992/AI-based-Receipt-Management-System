@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
+import 'package:tripo/utils/styles.dart';
 
 List profilesShortcutList = [
   // {
@@ -15,7 +16,7 @@ List profilesShortcutList = [
   //   'icon': IconlyBold.setting,
   // },
   {
-    'color': const Color(0xFF375E69),
+    'color': Styles.primaryColor,
     'icon': IconlyBold.logout,
   },
 ];

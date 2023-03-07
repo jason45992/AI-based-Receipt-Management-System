@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:document_scanner_flutter/configs/configs.dart';
 import 'package:document_scanner_flutter/document_scanner_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
 import 'package:tripo/generated/assets.dart';
@@ -32,6 +32,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   late User _currentUser;
   List<Map<String, dynamic>> transactions = [];
+  List<ChartData> charSections = [];
+  double totalAllAmount = 0;
   List<String> filterOptions = ['Latest', 'Today', 'Week', 'Month'];
 
   List<double> categoryPecent = [];
@@ -39,9 +41,22 @@ class _HomeState extends State<Home> {
   int touchedIndex = -1;
   String documentId = '';
   String profileImgUrl = '';
+  late TooltipBehavior _tooltip;
 
   @override
   void initState() {
+    _tooltip = TooltipBehavior(
+        enable: true,
+        builder: (dynamic data, dynamic point, dynamic series, int pointIndex,
+            int seriesIndex) {
+          return Container(
+              padding: const EdgeInsets.all(5),
+              child: Text(
+                '${data.title} : \$${data.amount.toString()}',
+                style: const TextStyle(color: Colors.white),
+              ));
+        });
+
     _currentUser = FirebaseAuth.instance.currentUser!;
     getUserData();
     getTransactions();
@@ -72,7 +87,7 @@ class _HomeState extends State<Home> {
         body: SnappingSheet(
       snappingPositions: const [
         SnappingPosition.pixels(
-          positionPixels: 320,
+          positionPixels: 230,
           snappingCurve: Curves.elasticOut,
           snappingDuration: Duration(milliseconds: 1750),
         ),
@@ -150,61 +165,61 @@ class _HomeState extends State<Home> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        height: size.height * 0.23,
-                        width: size.width * 0.54,
-                        // padding: const EdgeInsets.fromLTRB(16, 10, 0, 20),
+                        height: size.height * 0.35,
+                        width: size.width * 0.78,
+                        // margin: const EdgeInsets.fromLTRB(0, 60, 0, 0),
                         decoration: const BoxDecoration(
-                          borderRadius: BorderRadius.horizontal(
-                              left: Radius.circular(15)),
                           color: Colors.transparent,
                         ),
                         child: AspectRatio(
                           aspectRatio: 1,
-                          child: PieChart(
-                            PieChartData(
-                              pieTouchData: PieTouchData(
-                                touchCallback:
-                                    (FlTouchEvent event, pieTouchResponse) {
-                                  setState(() {
-                                    if (!event.isInterestedForInteractions ||
-                                        pieTouchResponse == null ||
-                                        pieTouchResponse.touchedSection ==
-                                            null) {
-                                      touchedIndex = -1;
-                                      return;
-                                    }
-                                    touchedIndex = pieTouchResponse
-                                        .touchedSection!.touchedSectionIndex;
-                                  });
-                                },
-                              ),
-                              borderData: FlBorderData(
-                                show: false,
-                              ),
-                              sectionsSpace: 0,
-                              // startDegreeOffset: 10,
-                              centerSpaceRadius: 55,
-                              sections: showingSections(),
-                            ),
-                          ),
+                          child: SfCircularChart(
+                              annotations: [
+                                CircularChartAnnotation(
+                                    widget: Container(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text('Total ',
+                                          style: TextStyle(
+                                              color: Repository.subTextColor(
+                                                  context),
+                                              fontWeight: FontWeight.normal,
+                                              fontSize: 15)),
+                                      Text(
+                                          '\$${totalAllAmount.toPrecision(2)} ',
+                                          style: TextStyle(
+                                              color:
+                                                  Repository.textColor(context),
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 30)),
+                                    ],
+                                  ),
+                                ))
+                              ],
+                              tooltipBehavior: _tooltip,
+                              series: <CircularSeries>[
+                                DoughnutSeries<ChartData, String>(
+                                  dataSource: charSections,
+                                  animationDuration: 1000,
+                                  xValueMapper: (ChartData data, _) =>
+                                      data.title,
+                                  yValueMapper: (ChartData data, _) =>
+                                      data.value,
+                                  pointColorMapper: (ChartData data, _) =>
+                                      data.color,
+                                  // Corner style of doughnut segment
+                                  cornerStyle: CornerStyle.bothFlat,
+                                  explodeAll: true,
+                                  radius: '100%',
+                                  innerRadius: '60%',
+                                ),
+                              ]),
                         ),
                       ),
-                      // Container(
-                      //     height: size.height * 0.26,
-                      //     width: size.width * 0.36,
-                      //     padding: const EdgeInsets.fromLTRB(10, 10, 0, 20),
-                      //     decoration: BoxDecoration(
-                      //         borderRadius: const BorderRadius.horizontal(
-                      //             right: Radius.circular(15)),
-                      //         color: Styles.yellowColor),
-                      //     child: Column(
-                      //       mainAxisAlignment: MainAxisAlignment.end,
-                      //       crossAxisAlignment: CrossAxisAlignment.start,
-                      //       children: getIndicator(),
-                      //     )),
                     ],
                   ),
-                  const Gap(15),
+                  const Gap(0),
                   SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Row(
@@ -347,7 +362,7 @@ class _HomeState extends State<Home> {
                 width: 50,
                 height: 5,
                 decoration: BoxDecoration(
-                    color: Styles.primaryColor,
+                    color: Repository.textColor(context),
                     borderRadius: BorderRadius.circular(50)),
               ),
               Row(
@@ -509,6 +524,7 @@ class _HomeState extends State<Home> {
             );
         break;
     }
+    showingSections();
     setState(() {});
   }
 
@@ -564,19 +580,18 @@ class _HomeState extends State<Home> {
     }
   }
 
-  List<PieChartSectionData> showingSections() {
-    List<PieChartSectionData> result = [];
+  Future<void> showingSections() async {
+    charSections = [];
     categoryPecent = [];
+    totalAllAmount = 0;
 
-    double totalAllAmount = 0;
     for (var element in transactions) {
       totalAllAmount += double.parse(element['total_amount']);
     }
     var categoryMap = groupBy(transactions, (Map obj) => obj['category']);
-    List<dynamic> keys = categoryMap.keys.toList();
     if (categoryMap.isNotEmpty) {
       categoryMap.forEach((i, value) {
-        int index = keys.indexOf(i);
+        // int index = keys.indexOf(i);
 
         double totalCategoryAmount = 0;
         for (var element in value) {
@@ -585,25 +600,19 @@ class _HomeState extends State<Home> {
         double percent =
             ((totalCategoryAmount / totalAllAmount)).toPrecision(3);
         categoryPecent.add(percent);
-        final isTouched = index == touchedIndex;
-        final fontSize = isTouched ? 16.0 : 12.0;
-        final radius = isTouched ? 60.0 : 50.0;
-        const shadows = [Shadow(color: Colors.black, blurRadius: 1)];
-        result.add(PieChartSectionData(
-          color: getIconColor(i.toString()),
-          value: percent,
-          title: (((totalCategoryAmount).toPrecision(2)).toString()),
-          radius: radius,
-          titleStyle: TextStyle(
-            fontSize: fontSize,
-            fontWeight: FontWeight.bold,
-            color: Styles.primaryColor,
-            shadows: shadows,
-          ),
+        // final isTouched = index == touchedIndex;
+        // final fontSize = isTouched ? 16.0 : 12.0;
+        // final radius = isTouched ? 60.0 : 50.0;
+        // const shadows = [Shadow(color: Colors.black, blurRadius: 1)];
+        charSections.add(ChartData(
+          i.toString(),
+          (totalCategoryAmount).toPrecision(2),
+          percent,
+          getIconColor(i.toString()),
         ));
       });
     }
-    return result;
+    setState(() {});
   }
 
   List<Widget> getIndicator() {
@@ -637,7 +646,7 @@ class _HomeState extends State<Home> {
             width: MediaQuery.of(context).size.width - 300,
             animation: true,
             lineHeight: 8.0,
-            animationDuration: 500,
+            animationDuration: 1000,
             percent: percent,
             progressColor: getIconColor(keys[index]),
           )
@@ -668,4 +677,12 @@ class _HomeState extends State<Home> {
     });
     setState(() {});
   }
+}
+
+class ChartData {
+  ChartData(this.title, this.amount, this.value, this.color);
+  final String title;
+  final double amount;
+  final double value;
+  final Color color;
 }

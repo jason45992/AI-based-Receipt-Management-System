@@ -115,6 +115,18 @@ class _ReceiptDetailState extends State<ReceiptDetail> {
                             // textAlign: TextAlign.left,
                           ),
                           const Gap(5),
+                          Text(
+                            'Warranty: : ' +
+                                (_currentTransaction['with_warranty']
+                                    ? 'Yes'
+                                    : 'No'),
+                            style: TextStyle(
+                                color: Repository.textColor(context),
+                                fontWeight: FontWeight.w500,
+                                fontSize: 15),
+                            // textAlign: TextAlign.left,
+                          ),
+                          const Gap(5),
                         ]),
                     _center.latitude == 0
                         ? const Gap(0)

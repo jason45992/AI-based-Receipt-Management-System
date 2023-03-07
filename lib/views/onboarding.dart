@@ -58,14 +58,20 @@ class Onboarding extends StatelessWidget {
                 child: SizedBox(
                   height: 55,
                   width: double.infinity,
-                  child: FlatButton(
-                    textColor: Colors.white,
-                    color: const Color(0xFFF69A26),
+                  child: TextButton(
+                    // textColor: Colors.white,
+                    // color: const Color(0xFFF69A26),
                     onPressed: () {
                       Navigator.pushReplacementNamed(context, '/login');
                     },
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                    style: TextButton.styleFrom(
+                      backgroundColor: const Color(0xFFF69A26),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.all(16.0),
+                      textStyle: const TextStyle(fontSize: 20),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
                     ),
                     child: const Padding(
                         padding: EdgeInsets.only(
