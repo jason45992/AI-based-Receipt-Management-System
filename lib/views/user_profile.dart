@@ -92,8 +92,8 @@ class _UserProfileState extends State<UserProfile> {
                           ),
                           Positioned(
                             top: 30,
-                            left: 30,
-                            right: 30,
+                            left: MediaQuery.of(context).size.width * 0.08,
+                            right: MediaQuery.of(context).size.width * 0.07,
                             child: DottedBorder(
                                 borderType: BorderType.Circle,
                                 dashPattern: const [20, 5],

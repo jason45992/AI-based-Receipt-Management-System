@@ -85,13 +85,13 @@ class _HomeState extends State<Home> {
     final size = Layouts.getSize(context);
     return Scaffold(
         body: SnappingSheet(
-      snappingPositions: const [
+      snappingPositions: [
         SnappingPosition.pixels(
-          positionPixels: 230,
+          positionPixels: MediaQuery.of(context).size.height * 0.28,
           snappingCurve: Curves.elasticOut,
-          snappingDuration: Duration(milliseconds: 1750),
+          snappingDuration: const Duration(milliseconds: 1750),
         ),
-        SnappingPosition.factor(
+        const SnappingPosition.factor(
           positionFactor: 0.859,
           snappingCurve: Curves.bounceOut,
           snappingDuration: Duration(seconds: 1),
