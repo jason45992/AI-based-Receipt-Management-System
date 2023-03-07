@@ -75,6 +75,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: Column(
                         children: [
                           TextFormField(
+                            autocorrect: false,
                             enableSuggestions: false,
                             controller: _emailTextController,
                             focusNode: _focusEmail,

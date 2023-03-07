@@ -56,6 +56,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: Column(
                     children: <Widget>[
                       TextFormField(
+                        autocorrect: false,
+                        enableSuggestions: false,
                         controller: _nameTextController,
                         focusNode: _focusName,
                         validator: (value) => Validator.validateName(
@@ -77,6 +79,8 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 16.0),
                       TextFormField(
+                        autocorrect: false,
+                        enableSuggestions: false,
                         controller: _emailTextController,
                         focusNode: _focusEmail,
                         validator: (value) => Validator.validateEmail(
