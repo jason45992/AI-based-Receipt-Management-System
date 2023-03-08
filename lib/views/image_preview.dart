@@ -35,6 +35,7 @@ class _ImagePreviewState extends State<ImagePreview> {
   String orignalImgPath = '';
   List<bool> isSelectedWarranty = [false, true];
   bool validDatetime = false;
+  bool _isProcessing = false;
   GlobalKey<FormState> autoAddFormKey = GlobalKey<FormState>();
   final TextEditingController _vendor = TextEditingController();
   final TextEditingController _receiptDate = TextEditingController();
@@ -305,32 +306,39 @@ class _ImagePreviewState extends State<ImagePreview> {
                                       },
                                     ),
                                     const Gap(10),
-                                    elevatedButton(
-                                        color: Repository.selectedItemColor(
-                                            context),
-                                        context: context,
-                                        text: 'Add Receipt',
-                                        callback: () async {
-                                          print('Form Valid? ');
-                                          print(autoAddFormKey.currentState
-                                              ?.validate()
-                                              .toString());
-                                          if (autoAddFormKey.currentState!
-                                                  .validate() &&
-                                              validDatetime) {
-                                            uploadImage();
-                                          }
-                                          //   print(_vendor.text
-                                          //       .capitalizeFistWord());
-                                          //   print(Timestamp.fromDate(DateFormat(
-                                          //           'dd/MM/yyyy HH:mm')
-                                          //       .parseStrict(_receiptDate.text)));
-                                          //   print(receiptCategory);
-                                          //   print(
-                                          //       double.parse(_receiptAmount.text)
-                                          //           .toStringAsFixed(2));
-                                          //   print(_receiptWarranty.toString());
-                                        }),
+                                    _isProcessing
+                                        ? CircularProgressIndicator(
+                                            color: Styles.primaryColor,
+                                          )
+                                        : elevatedButton(
+                                            color: Repository.selectedItemColor(
+                                                context),
+                                            context: context,
+                                            text: 'Add Receipt',
+                                            callback: () async {
+                                              print('Form Valid? ');
+                                              print(autoAddFormKey.currentState
+                                                  ?.validate()
+                                                  .toString());
+                                              if (autoAddFormKey.currentState!
+                                                      .validate() &&
+                                                  validDatetime) {
+                                                setState(() {
+                                                  _isProcessing = true;
+                                                });
+                                                uploadImage();
+                                              }
+                                              //   print(_vendor.text
+                                              //       .capitalizeFistWord());
+                                              //   print(Timestamp.fromDate(DateFormat(
+                                              //           'dd/MM/yyyy HH:mm')
+                                              //       .parseStrict(_receiptDate.text)));
+                                              //   print(receiptCategory);
+                                              //   print(
+                                              //       double.parse(_receiptAmount.text)
+                                              //           .toStringAsFixed(2));
+                                              //   print(_receiptWarranty.toString());
+                                            }),
                                   ]),
                                 ))
                           ],
@@ -461,8 +469,14 @@ class _ImagePreviewState extends State<ImagePreview> {
 
       db.collection('receipts').add(receiptInfo).then((DocumentReference doc) {
         print('DocumentSnapshot added with ID: ${doc.id}');
+        setState(() {
+          _isProcessing = false;
+        });
         Navigator.of(context).restorablePush(_dialogSuccessBuilder);
       }).onError((error, stackTrace) {
+        setState(() {
+          _isProcessing = false;
+        });
         Navigator.of(context).restorablePush(_dialogFailBuilder);
       });
     } else {
