@@ -54,7 +54,7 @@ class DefaultTextField extends StatelessWidget {
           _title,
           style: TextStyle(
               color: Repository.textColor(context),
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
               fontSize: 15),
         ),
         Gap(getProportionateScreenHeight(5)),

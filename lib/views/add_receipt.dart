@@ -29,7 +29,7 @@ class _AddReceiptState extends State<AddReceipt> {
   final TextEditingController _receiptAmount = TextEditingController();
   final TextEditingController _receiptDate = TextEditingController();
   final TextEditingController _receiptTime = TextEditingController();
-  final TextEditingController _receiptAddINfo = TextEditingController();
+  // final TextEditingController _receiptAddINfo = TextEditingController();
   String _receiptCatehory = 'Food';
   bool _receiptWarranty = false;
 
@@ -94,7 +94,7 @@ class _AddReceiptState extends State<AddReceipt> {
                                   child: Icon(getIcon(category),
                                       color: getIconColor(category), size: 28),
                                 ),
-                                Gap(5),
+                                const Gap(5),
                                 Text(
                                   category,
                                   style: TextStyle(
@@ -196,11 +196,11 @@ class _AddReceiptState extends State<AddReceipt> {
                           ))
                         ],
                       ),
-                      DefaultTextField(
-                        controller: _receiptAddINfo,
-                        mandatory: false,
-                        title: 'Additional Information',
-                      )
+                      // DefaultTextField(
+                      //   controller: _receiptAddINfo,
+                      //   mandatory: false,
+                      //   title: 'Additional Information',
+                      // )
                     ],
                   ),
                 ),
@@ -294,7 +294,7 @@ class _AddReceiptState extends State<AddReceipt> {
     print(_receiptAmount.text);
     print(_receiptDate.text);
     print(_receiptTime.text);
-    print(_receiptAddINfo.text);
+    // print(_receiptAddINfo.text);
     print(_receiptWarranty);
 
     final db = FirebaseFirestore.instance;
@@ -307,7 +307,7 @@ class _AddReceiptState extends State<AddReceipt> {
       'category': _receiptCatehory,
       'total_amount': _receiptAmount.text,
       'user_email': currentUser?.email,
-      'addtional_info': _receiptAddINfo.text,
+      // 'addtional_info': _receiptAddINfo.text,
       'with_warranty': _receiptWarranty,
       'lat': 0,
       'lng': 0,

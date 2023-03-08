@@ -361,10 +361,10 @@ class _HomeState extends State<Home> {
             children: [
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 20),
-                width: 50,
+                width: 60,
                 height: 5,
                 decoration: BoxDecoration(
-                    color: Repository.textColor(context),
+                    color: Repository.iconColor(context),
                     borderRadius: BorderRadius.circular(50)),
               ),
               Row(
