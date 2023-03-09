@@ -529,6 +529,9 @@ class _ImagePreviewState extends State<ImagePreview> {
 
   String formatDatetime(String date, String time) {
     //prase date
+    if (date.isNotEmpty && date.length > 10) {
+      date = date.replaceAll(' ', '');
+    }
     if (date.isNotEmpty && !isValidDate(date, 'dd/MM/yyyy')) {
       String dateFormat = '';
       if (isValidDate(date, 'dd-MM-yyyy')) {
