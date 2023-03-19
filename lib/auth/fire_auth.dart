@@ -58,6 +58,18 @@ class FireAuth {
     return user;
   }
 
+  // For rest password
+  static Future<bool> resetPassword({required String email}) async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    bool result = false;
+    await auth
+        .sendPasswordResetEmail(email: email)
+        .then((value) => result = true)
+        .catchError((e) => print(e));
+
+    return result;
+  }
+
   static Future<User?> refreshUser(User user) async {
     FirebaseAuth auth = FirebaseAuth.instance;
 

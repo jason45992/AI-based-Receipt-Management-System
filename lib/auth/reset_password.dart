@@ -1,30 +1,29 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tripo/auth/register_page.dart';
 import 'package:tripo/auth/fire_auth.dart';
-import 'package:tripo/auth/reset_password.dart';
 import 'package:tripo/auth/validator.dart';
 import 'package:tripo/utils/styles.dart';
 import 'package:tripo/widgets/buttons.dart';
+import 'package:tripo/widgets/my_app_bar.dart';
 
 import '../widgets/bottom_nav.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+class ResetPasswordPage extends StatefulWidget {
+  const ResetPasswordPage({Key? key}) : super(key: key);
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _ResetPasswordPageState createState() => _ResetPasswordPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final _formKey = GlobalKey<FormState>();
 
   final _emailTextController = TextEditingController();
-  final _passwordTextController = TextEditingController();
 
   final _focusEmail = FocusNode();
-  final _focusPassword = FocusNode();
 
   bool _isProcessing = false;
   bool _isError = false;
@@ -49,12 +48,10 @@ class _LoginPageState extends State<LoginPage> {
     return GestureDetector(
       onTap: () {
         _focusEmail.unfocus();
-        _focusPassword.unfocus();
       },
       child: Scaffold(
-        // appBar: AppBar(
-        //   title: Text('Firebase Authentication'),
-        // ),
+        appBar: myAppBar(
+            title: 'Reset Password', implyLeading: true, context: context),
         body: FutureBuilder(
           future: _initializeFirebase(),
           builder: (context, snapshot) {
@@ -64,13 +61,6 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 24.0),
-                      child: Text(
-                        'Login',
-                        style: Theme.of(context).textTheme.headline1,
-                      ),
-                    ),
                     Form(
                       key: _formKey,
                       child: Column(
@@ -98,35 +88,12 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 8.0),
-                          TextFormField(
-                            controller: _passwordTextController,
-                            focusNode: _focusPassword,
-                            obscureText: true,
-                            validator: (value) => Validator.validatePassword(
-                              password: value,
-                            ),
-                            cursorColor: Styles.primaryColor,
-                            decoration: InputDecoration(
-                              hintText: 'Password',
-                              focusedBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Styles.primaryColor),
-                              ),
-                              errorBorder: UnderlineInputBorder(
-                                borderRadius: BorderRadius.circular(6.0),
-                                borderSide: const BorderSide(
-                                  color: Colors.red,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 24.0),
+                          const SizedBox(height: 50.0),
                           if (_isError)
                             const Padding(
                               padding: EdgeInsets.only(bottom: 20),
                               child: Text(
-                                'The email or password is incorrect, please try again.',
+                                'The email is invalid.',
                                 style:
                                     TextStyle(color: Colors.red, fontSize: 13),
                               ),
@@ -144,7 +111,6 @@ class _LoginPageState extends State<LoginPage> {
                                             context: context,
                                             callback: () async {
                                               _focusEmail.unfocus();
-                                              _focusPassword.unfocus();
 
                                               if (_formKey.currentState!
                                                   .validate()) {
@@ -152,60 +118,38 @@ class _LoginPageState extends State<LoginPage> {
                                                   _isProcessing = true;
                                                 });
 
-                                                User? user = await FireAuth
-                                                    .signInUsingEmailPassword(
-                                                  email:
-                                                      _emailTextController.text,
-                                                  password:
-                                                      _passwordTextController
-                                                          .text,
-                                                );
+                                                // User? user = await FireAuth
+                                                //     .signInUsingEmailPassword(
+                                                //   email:
+                                                //       _emailTextController.text,
+                                                //   password:
+                                                //       _passwordTextController
+                                                //           .text,
+                                                // );
+
+                                                bool status = await FireAuth
+                                                    .resetPassword(
+                                                        email:
+                                                            _emailTextController
+                                                                .text);
 
                                                 setState(() {
                                                   _isProcessing = false;
                                                 });
 
-                                                if (user != null) {
+                                                if (status) {
                                                   _isError = false;
                                                   Navigator.of(context)
-                                                      .pushReplacement(
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          const BottomNav(),
-                                                    ),
-                                                  );
+                                                      .restorablePush(
+                                                          _dialogSuccessBuilder);
                                                 } else {
                                                   _isError = true;
                                                 }
                                               }
                                             },
-                                            text: 'Sign In')),
-                                    const SizedBox(width: 24.0),
-                                    Expanded(
-                                        child: elevatedButton(
-                                            color: Styles.darkGreyColor,
-                                            context: context,
-                                            callback: () {
-                                              Navigator.of(context).push(
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      const RegisterPage(),
-                                                ),
-                                              );
-                                            },
-                                            text: 'Register')),
+                                            text: 'Reset'))
                                   ],
                                 ),
-                          TextButton(
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const ResetPasswordPage(),
-                                  ),
-                                );
-                              },
-                              child: Text('Forget Password?'))
                         ],
                       ),
                     )
@@ -214,12 +158,35 @@ class _LoginPageState extends State<LoginPage> {
               );
             }
 
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(),
             );
           },
         ),
       ),
+    );
+  }
+
+  static Route<Object?> _dialogSuccessBuilder(
+      BuildContext context, Object? arguments) {
+    return CupertinoDialogRoute<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: const Text('Email sent successfully'),
+          content: const Text(
+              'Please follow the reset password link in the email to reset your password.'),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
