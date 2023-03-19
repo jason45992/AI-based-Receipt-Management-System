@@ -24,7 +24,6 @@ class _AuthenticationState extends State<Authentication> {
           builder: (context) => const BottomNav(),
         ),
       );
-      // Navigator.pushReplacementNamed(context, '/home');
     }
 
     return firebaseApp;
@@ -35,7 +34,7 @@ class _AuthenticationState extends State<Authentication> {
     return FutureBuilder(
         future: _initializeFirebase(),
         builder: (context, snapshot) {
-          return MaterialApp(
+          return const MaterialApp(
             title: 'Flutter Authentication',
             debugShowCheckedModeBanner: false,
             home: LoginPage(),

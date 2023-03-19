@@ -170,7 +170,11 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
                         child: ToggleButtons(
                           borderRadius: BorderRadius.circular(50),
                           children: <Widget>[
-                            Padding(
+                            Container(
+                                color: _warranty[0]
+                                    ? Styles.greenColor
+                                    : Styles.whiteColor,
+                                height: 100,
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 10),
                                 child: Row(
@@ -196,11 +200,11 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
                               filterContent();
                             });
                           },
-                          borderColor:
-                              getIconColor(categoryItemsWithWarranty[0]),
-                          color: getIconColor(categoryItemsWithWarranty[0]),
-                          selectedColor: Repository.bgColor(context),
-                          fillColor: Repository.titleColor(context),
+                          borderColor: Repository.textColor(context),
+                          selectedBorderColor: Repository.textColor(context),
+                          color: getIconColor('Warranty'),
+                          selectedColor: Styles.whiteColor,
+                          fillColor: Styles.greenColor,
                           highlightColor: Colors.transparent,
                           splashColor: Colors.transparent,
                         )),
@@ -470,13 +474,13 @@ class _ReceiptManagementState extends State<ReceiptManagement> {
     return Theme(
       data: Theme.of(context).copyWith(
         colorScheme: ColorScheme.light(
-          primary: Repository.textColor(context), // <-- SEE HERE
-          onPrimary: Repository.accentColor(context), // <-- SEE HERE
-          onSurface: Repository.textColor(context), // <-- SEE HERE
+          primary: Styles.primaryColor, // <-- SEE HERE
+          onPrimary: Styles.greyColor, // <-- SEE HERE
+          onSurface: Styles.primaryColor, // <-- SEE HERE
         ),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
-            primary: Repository.textColor(context), // button text color
+            primary: Styles.primaryColor, // button text color
           ),
         ),
       ),

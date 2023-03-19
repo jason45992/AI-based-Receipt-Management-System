@@ -13,6 +13,8 @@ import 'package:tripo/widgets/buttons.dart';
 import 'package:tripo/widgets/default_text_field.dart';
 import 'package:tripo/widgets/my_app_bar.dart';
 
+import '../utils/styles.dart';
+
 class AddReceipt extends StatefulWidget {
   const AddReceipt({Key? key}) : super(key: key);
 
@@ -274,13 +276,13 @@ class _AddReceiptState extends State<AddReceipt> {
     return Theme(
       data: Theme.of(context).copyWith(
         colorScheme: ColorScheme.light(
-          primary: Repository.textColor(context), // <-- SEE HERE
-          onPrimary: Repository.accentColor(context), // <-- SEE HERE
-          onSurface: Repository.textColor(context), // <-- SEE HERE
+          primary: Styles.primaryColor, // <-- SEE HERE
+          onPrimary: Styles.greyColor, // <-- SEE HERE
+          onSurface: Styles.primaryColor, // <-- SEE HERE
         ),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
-            primary: Repository.textColor(context), // button text color
+            primary: Styles.primaryColor, // button text color
           ),
         ),
       ),

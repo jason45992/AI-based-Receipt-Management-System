@@ -432,13 +432,13 @@ class _StatsState extends State<Stats> {
     return Theme(
       data: Theme.of(context).copyWith(
         colorScheme: ColorScheme.light(
-          primary: Repository.textColor(context), // <-- SEE HERE
-          onPrimary: Repository.accentColor(context), // <-- SEE HERE
-          onSurface: Repository.textColor(context), // <-- SEE HERE
+          primary: Styles.primaryColor, // <-- SEE HERE
+          onPrimary: Styles.greyColor, // <-- SEE HERE
+          onSurface: Styles.primaryColor, // <-- SEE HERE
         ),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
-            primary: Repository.textColor(context), // button text color
+            primary: Styles.primaryColor, // button text color
           ),
         ),
       ),

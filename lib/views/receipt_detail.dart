@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:provider/provider.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
 import 'package:tripo/json/category_list.dart';
 import 'package:tripo/repo/repository.dart';
@@ -13,6 +14,7 @@ import 'package:tripo/utils/layouts.dart';
 import 'package:tripo/utils/size_config.dart';
 import 'package:tripo/utils/styles.dart';
 import 'package:tripo/utils/validation.dart';
+import 'package:tripo/view_models/view_models.dart';
 import 'package:tripo/widgets/buttons.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:tripo/widgets/default_text_field.dart';
@@ -148,7 +150,9 @@ class _ReceiptDetailState extends State<ReceiptDetail> {
                   draggable: false,
                   child: Container(
                     padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-                    color: Colors.white,
+                    color: context.watch<ViewModel>().isDark
+                        ? Colors.black
+                        : Colors.white,
                     child: ListView(children: [
                       Form(
                         key: upateFormKey,

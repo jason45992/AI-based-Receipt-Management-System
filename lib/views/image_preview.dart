@@ -362,7 +362,7 @@ class _ImagePreviewState extends State<ImagePreview> {
     });
     final response = await dio.post('https://image-ocr-jkabdnncda-as.a.run.app',
         data: formData, options: Options(responseType: ResponseType.bytes));
-    // print(ocrResult);
+
     List<dynamic> ocrResult = jsonDecode(response.headers['result']!.first);
     if (response.statusCode == 200) {
       try {
@@ -398,7 +398,6 @@ class _ImagePreviewState extends State<ImagePreview> {
 
         if (receiptVendorName.isNotEmpty) {
           // get category
-          // Optionally the request above could also be done as
           Response cateResponse = await dio.get(
               'https://maps.googleapis.com/maps/api/place/findplacefromtext/json?fields=name%2Cformatted_address%2Ctype%2Cgeometry&inputtype=textquery',
               queryParameters: {
