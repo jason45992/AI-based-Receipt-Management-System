@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tripo/repo/repository.dart';
-import 'package:iconly/iconly.dart';
-import 'package:gap/gap.dart';
 
 AppBar myAppBar(
     {required String title,
@@ -28,7 +26,5 @@ AppBar myAppBar(
               onPressed: () => Navigator.pop(context),
             ))
         : const SizedBox(),
-    // actions:
-    //     hasAction == true ? const [Icon(IconlyBroken.search), Gap(15)] : null,
   );
 }

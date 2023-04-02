@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tripo/generated/assets.dart';
 import 'package:tripo/repo/repository.dart';
-import 'package:tripo/utils/size_config.dart';
 import 'package:tripo/widgets/buttons.dart';
 import 'package:iconly/iconly.dart';
 import 'package:tripo/utils/styles.dart';
@@ -64,54 +63,55 @@ class _UserProfileState extends State<UserProfile> {
                     // padding: const EdgeInsets.all(20),
                     children: [
                       // const Gap(40),
-                      Stack(
-                        children: [
-                          Container(
-                            height: 250,
-                            alignment: Alignment.bottomCenter,
-                            child: Container(
-                              height: 180,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                // color: Repository.accentColor(context),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  const Gap(50),
-                                  Text(
-                                      'Joined ${DateTime.now().difference(_currentUser.metadata.creationTime!).inDays} days',
-                                      style: TextStyle(
-                                          color:
-                                              Repository.subTextColor(context),
-                                          fontWeight: FontWeight.bold)),
-                                ],
+                      Center(
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Container(
+                              height: 250,
+                              alignment: Alignment.bottomCenter,
+                              child: Container(
+                                height: 180,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  // color: Repository.accentColor(context),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    const Gap(50),
+                                    Text(
+                                        'Joined ${DateTime.now().difference(_currentUser.metadata.creationTime!).inDays} days',
+                                        style: TextStyle(
+                                            color: Repository.subTextColor(
+                                                context),
+                                            fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                          Positioned(
-                            top: 30,
-                            left: MediaQuery.of(context).size.width * 0.08,
-                            right: MediaQuery.of(context).size.width * 0.07,
-                            child: DottedBorder(
-                                borderType: BorderType.Circle,
-                                dashPattern: const [20, 5],
-                                color: Colors.grey,
-                                strokeWidth: 3,
-                                child: Container(
-                                  margin: EdgeInsets.fromLTRB(
-                                      MediaQuery.of(context).size.width * 0.24,
-                                      5,
-                                      5,
-                                      5),
-                                  height: 100,
-                                  width: 100,
-                                  // color: Colors.amber,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Styles.greenColor,
-                                  ),
+                            Positioned(
+                              top: 30,
+                              child: DottedBorder(
+                                  borderType: BorderType.Circle,
+                                  dashPattern: const [20, 5],
+                                  color: Colors.grey,
+                                  strokeWidth: 3,
+                                  child: Container(
+                                    margin:
+                                        const EdgeInsets.fromLTRB(5, 5, 5, 5),
+                                    height: 100,
+                                    width: 100,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.transparent,
+                                    ),
+                                  )),
+                            ),
+                            Positioned(
+                                top: 37,
+                                child: Center(
                                   child: CircleAvatar(
                                     backgroundColor: Styles.greenColor,
                                     radius: 50,
@@ -121,68 +121,70 @@ class _UserProfileState extends State<UserProfile> {
                                             Assets.defaultUserProfileImg),
                                   ),
                                 )),
-                          ),
-                          Positioned(
-                              top: 105,
-                              left: 100,
-                              right: 30,
-                              child: InkWell(
-                                  child: Container(
-                                    height: 35,
-                                    width: 35,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Styles.primaryColor,
-                                      border: Border.all(
-                                          color: Styles.whiteColor, width: 2),
+                            Positioned(
+                                top: 105,
+                                left: 100,
+                                right: 30,
+                                child: InkWell(
+                                    child: Container(
+                                      height: 35,
+                                      width: 35,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Styles.primaryColor,
+                                        border: Border.all(
+                                            color: Styles.whiteColor, width: 2),
+                                      ),
+                                      child: Icon(
+                                        IconlyBold.edit,
+                                        color: Styles.greyColor,
+                                        size: 20,
+                                      ),
                                     ),
-                                    child: Icon(
-                                      IconlyBold.edit,
-                                      color: Styles.greyColor,
-                                      size: 20,
-                                    ),
-                                  ),
-                                  highlightColor: Colors.transparent,
-                                  splashColor: Colors.transparent,
-                                  onTap: () async {
-                                    showModalBottomSheet(
-                                      context: context,
-                                      builder: (context) {
-                                        return Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: <Widget>[
-                                            ListTile(
-                                              leading: const Icon(Icons.upload),
-                                              title: const Text(
-                                                  'Upload New Profile Photo'),
-                                              onTap: () {
-                                                Navigator.pop(context);
-                                                uploadNewProfileImage();
-                                                setState(() {});
-                                              },
-                                            ),
-                                            ListTile(
-                                              leading: const Icon(Icons.delete),
-                                              title: const Text(
-                                                  'Rmove Profile Photo'),
-                                              onTap: () {
-                                                Navigator.pop(context);
-                                                deleteProfileImg();
-                                                setState(() {});
-                                                //set to default photo
-                                              },
-                                            ),
-                                            ListTile(
-                                              onTap: () {
-                                                Navigator.pop(context);
-                                              },
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
-                                  }))
-                        ],
+                                    highlightColor: Colors.transparent,
+                                    splashColor: Colors.transparent,
+                                    onTap: () async {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        builder: (context) {
+                                          return Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: <Widget>[
+                                              ListTile(
+                                                leading:
+                                                    const Icon(Icons.upload),
+                                                title: const Text(
+                                                    'Upload New Profile Photo'),
+                                                onTap: () {
+                                                  Navigator.pop(context);
+                                                  uploadNewProfileImage();
+                                                  setState(() {});
+                                                },
+                                              ),
+                                              ListTile(
+                                                leading:
+                                                    const Icon(Icons.delete),
+                                                title: const Text(
+                                                    'Rmove Profile Photo'),
+                                                onTap: () {
+                                                  Navigator.pop(context);
+                                                  deleteProfileImg();
+                                                  setState(() {});
+                                                  //set to default photo
+                                                },
+                                              ),
+                                              ListTile(
+                                                onTap: () {
+                                                  Navigator.pop(context);
+                                                },
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    }))
+                          ],
+                        ),
                       ),
 
                       Container(

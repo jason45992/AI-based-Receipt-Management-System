@@ -196,16 +196,22 @@ class _LoginPageState extends State<LoginPage> {
                                             text: 'Register')),
                                   ],
                                 ),
-                          TextButton(
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const ResetPasswordPage(),
-                                  ),
-                                );
-                              },
-                              child: Text('Forget Password?'))
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ResetPasswordPage(),
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  'Forget Password?',
+                                  style: TextStyle(color: Styles.primaryColor),
+                                )),
+                          )
                         ],
                       ),
                     )
