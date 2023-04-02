@@ -12,7 +12,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/jason45992/AI-based-Receipt-Management-System">
-    <img src="AI-based-Receipt-Management-System/assets/img/icon.png" alt="Logo" width="80" height="80">
+    <img src="https://github.com/jason45992/AI-based-Receipt-Management-System/blob/main/assets/img/icon.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">Tripo</h3>
@@ -60,7 +60,7 @@
 ## About The Project
 
 <!-- [![Product Name Screen Shot][product-screenshot]](https://example.com) -->
-<img src="AI-based-Receipt-Management-System/assets/intro.png">
+<!-- <img src="AI-based-Receipt-Management-System/assets/intro.png"> -->
 
 <!-- Since we are faced with the problem that NTU does not have one systematic platform (Web/App) which has access to all CCAs’ contact info and registration links. CCAs cannot publicize their club activities efficiently. In addition, students are unable to attend face-to-face briefing sessions of CCA clubs due to the Covid-19 situation while online sharing is ineffective and not widespread.
 
