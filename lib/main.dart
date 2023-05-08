@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
           primaryColor: Styles.primaryColor,
           backgroundColor: Styles.primaryColor,
         ),
-        initialRoute: '/authentication',
+        initialRoute: '/onboarding',
         routes: <String, WidgetBuilder>{
           '/authentication': (BuildContext context) => const Authentication(),
           '/onboarding': (BuildContext context) => const Onboarding(),
